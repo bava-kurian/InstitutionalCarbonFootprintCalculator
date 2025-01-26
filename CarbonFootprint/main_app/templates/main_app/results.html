@@ -1,0 +1,40 @@
+<!-- filepath: /d:/mini proj worl/InstitutionalCarbonFootprintCalculator/CarbonFootprint/main_app/templates/main_app/results.html -->
+{% extends "main_app/base.html" %} {% block title %}Results{% endblock %}
+{%block content %}
+<h1 class="mb-4">Calculated Emissions</h1>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Emissions (kg CO2e)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for category, emission in emissions.items %}
+    <tr>
+      <td>{{ category }}</td>
+      <td>{{ emission }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<div class="d-flex justify-content-center">
+  <canvas id="emissionsChart" class="mt-4" style="max-width: 500px"></canvas>
+</div>
+<script>
+  var ctx = document.getElementById('emissionsChart').getContext('2d');
+  var chart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+          labels: Object.keys({{ chart_data|safe }}),
+          datasets: [{
+              data: Object.values({{ chart_data|safe }}),
+              backgroundColor: ['red', 'blue', 'green', 'yellow', 'orange']
+          }]
+      },
+      options: {
+          responsive: true
+      }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,26 @@
+<!-- filepath: /d:/mini proj worl/InstitutionalCarbonFootprintCalculator/CarbonFootprint/main_app/templates/main_app/input_form.html -->
+{% extends "main_app/base.html" %} {% block title %}Input Data{% endblock %}
+{%block content %}
+<h1 class="mb-4">Input Data</h1>
+<form method="post" action="{% url 'calculate_emissions' %}">
+  {% csrf_token %}
+  <input type="hidden" name="year" value="{{ year }}" />
+  <div class="mb-3">
+    <h2>Energy Consumption</h2>
+    {{ energy_form.as_p }}
+  </div>
+  <div class="mb-3">
+    <h2>Transportation</h2>
+    {{ transportation_form.as_p }}
+  </div>
+  <div class="mb-3">
+    <h2>Water Usage</h2>
+    {{ water_form.as_p }}
+  </div>
+  <div class="mb-3">
+    <h2>Waste Management</h2>
+    {{ waste_form.as_p }}
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{% endblock %}
