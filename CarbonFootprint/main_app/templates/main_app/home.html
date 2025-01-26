@@ -1,84 +1,74 @@
-{% extends "main_app/base.html" %} {% block title %}Input Data{% endblock %}
-{%block content %}
+<!-- filepath: /d:/mini proj worl/InstitutionalCarbonFootprintCalculator/CarbonFootprint/main_app/templates/main_app/home.html -->
+{% extends "main_app/base.html" %} {% block title %}Home{% endblock %} {%block
+content%}
 <h1 class="mb-4">Welcome, {{ user.username }}</h1>
 
-{% if energy_data or transportation_data or water_data or waste_data %}
+{% if yearly_data %}
 <div class="row">
-  {% for data in energy_data %}
+  {% for data in yearly_data %}
   <div class="col-md-4">
     <div class="card mb-4">
       <div class="card-header">Year: {{ data.year }}</div>
       <div class="card-body">
         <h5 class="card-title">Energy Consumption</h5>
-        <p class="card-text">Electricity: {{ data.electricity_kwh }} kWh</p>
+        {% for energy in energy_data %} {% if energy.yearly_data.year ==
+        data.year %}
+        <p class="card-text">Electricity: {{ energy.electricity_kwh }} kWh</p>
         <p class="card-text">
-          Solar Generation: {{ data.solar_generation_kwh }} kWh
+          Solar Generation: {{ energy.solar_generation_kwh }} kWh
         </p>
         <p class="card-text">
-          Generator Fuel: {{ data.generator_fuel_liters }} liters
+          Generator Fuel: {{ energy.generator_fuel_liters }} liters
         </p>
-        <a href="{% url 'input_data' %}" class="btn btn-primary">Edit</a>
-      </div>
-    </div>
-  </div>
-  {% endfor %} {% for data in transportation_data %}
-  <div class="col-md-4">
-    <div class="card mb-4">
-      <div class="card-header">Year: {{ data.year }}</div>
-      <div class="card-body">
+        {% endif %} {% endfor %}
         <h5 class="card-title">Transportation</h5>
+        {% for transport in transportation_data %} {% if
+        transport.yearly_data.year == data.year %}
         <p class="card-text">
-          Total Students/Staff: {{ data.total_students_staff }}
+          Total Students/Staff: {{ transport.total_students_staff }}
         </p>
         <p class="card-text">
-          Distance by Bus: {{ data.distance_by_bus_km }} km
+          Distance by Bus: {{ transport.distance_by_bus_km }} km
         </p>
         <p class="card-text">
           Distance by Personal Vehicles: {{
-          data.distance_by_personal_vehicles_km }} km
+          transport.distance_by_personal_vehicles_km }} km
         </p>
         <p class="card-text">
-          Distance by Public Transport: {{ data.distance_by_public_transport_km
-          }} km
+          Distance by Public Transport: {{
+          transport.distance_by_public_transport_km }} km
         </p>
-        <p class="card-text">Distance by EV: {{ data.distance_by_ev_km }} km</p>
-        <a href="{% url 'input_data' %}" class="btn btn-primary">Edit</a>
-      </div>
-    </div>
-  </div>
-  {% endfor %} {% for data in water_data %}
-  <div class="col-md-4">
-    <div class="card mb-4">
-      <div class="card-header">Year: {{ data.year }}</div>
-      <div class="card-body">
+        <p class="card-text">
+          Distance by EV: {{ transport.distance_by_ev_km }} km
+        </p>
+        {% endif %} {% endfor %}
         <h5 class="card-title">Water Usage</h5>
-        <p class="card-text">Water Consumed: {{ data.water_consumed_kl }} kl</p>
+        {% for water in water_data %} {% if water.yearly_data.year == data.year
+        %}
         <p class="card-text">
-          Rainwater Harvesting Capacity: {{ data.rainwater_harvesting_capacity
+          Water Consumed: {{ water.water_consumed_kl }} kl
+        </p>
+        <p class="card-text">
+          Rainwater Harvesting Capacity: {{ water.rainwater_harvesting_capacity
           }} kl
         </p>
         <p class="card-text">
-          Wastewater Treated: {{ data.wastewater_treated_kl }} kl
+          Wastewater Treated: {{ water.wastewater_treated_kl }} kl
         </p>
-        <a href="{% url 'input_data' %}" class="btn btn-primary">Edit</a>
-      </div>
-    </div>
-  </div>
-  {% endfor %} {% for data in waste_data %}
-  <div class="col-md-4">
-    <div class="card mb-4">
-      <div class="card-header">Year: {{ data.year }}</div>
-      <div class="card-body">
+        {% endif %} {% endfor %}
         <h5 class="card-title">Waste Management</h5>
+        {% for waste in waste_data %} {% if waste.yearly_data.year == data.year
+        %}
         <p class="card-text">
-          Waste Generated: {{ data.waste_generated_tonnes }} tonnes
+          Waste Generated: {{ waste.waste_generated_tonnes }} tonnes
         </p>
         <p class="card-text">
-          Waste Treated: {{ data.waste_treated_tonnes }} tonnes
+          Waste Treated: {{ waste.waste_treated_tonnes }} tonnes
         </p>
         <p class="card-text">
-          Waste to Landfill: {{ data.waste_to_landfill_tonnes }} tonnes
+          Waste to Landfill: {{ waste.waste_to_landfill_tonnes }} tonnes
         </p>
+        {% endif %} {% endfor %}
         <a href="{% url 'input_data' %}" class="btn btn-primary">Edit</a>
       </div>
     </div>
