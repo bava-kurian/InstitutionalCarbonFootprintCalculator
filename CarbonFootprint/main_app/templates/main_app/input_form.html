@@ -1,48 +1,26 @@
+<!-- filepath: /d:/mini proj worl/InstitutionalCarbonFootprintCalculator/CarbonFootprint/main_app/templates/main_app/input_form.html -->
 {% extends "main_app/base.html" %} {% block title %}Input Data{% endblock %}
 {%block content %}
-<div class="container mt-5">
-  <h1 class="mb-4 text-center">Input Data</h1>
-  <form method="post" action="{% url 'calculate_emissions' %}">
-    {% csrf_token %}
-    <div class="mb-3">
-      <label for="year" class="form-label">Year</label>
-      <input
-        type="number"
-        name="year"
-        id="year"
-        class="form-control"
-        required
-      />
-    </div>
-    <div class="mb-3">
-      <h2>Energy Consumption</h2>
-      {% if energy_form.non_field_errors %}
-      <div class="alert alert-danger">{{ energy_form.non_field_errors }}</div>
-      {% endif %} {{ energy_form.as_p }}
-    </div>
-    <div class="mb-3">
-      <h2>Transportation</h2>
-      {% if transportation_form.non_field_errors %}
-      <div class="alert alert-danger">
-        {{ transportation_form.non_field_errors }}
-      </div>
-      {% endif %} {{ transportation_form.as_p }}
-    </div>
-    <div class="mb-3">
-      <h2>Water Usage</h2>
-      {% if water_form.non_field_errors %}
-      <div class="alert alert-danger">{{ water_form.non_field_errors }}</div>
-      {% endif %} {{ water_form.as_p }}
-    </div>
-    <div class="mb-3">
-      <h2>Waste Management</h2>
-      {% if waste_form.non_field_errors %}
-      <div class="alert alert-danger">{{ waste_form.non_field_errors }}</div>
-      {% endif %} {{ waste_form.as_p }}
-    </div>
-    <div class="text-center">
-      <button type="submit" class="btn btn-primary">Submit</button>
-    </div>
-  </form>
-</div>
+<h1 class="mb-4">Input Data</h1>
+<form method="post" action="{% url 'calculate_emissions' %}">
+  {% csrf_token %}
+  <input type="hidden" name="year" value="{{ year }}" />
+  <div class="mb-3">
+    <h2>Energy Consumption</h2>
+    {{ energy_form.as_p }}
+  </div>
+  <div class="mb-3">
+    <h2>Transportation</h2>
+    {{ transportation_form.as_p }}
+  </div>
+  <div class="mb-3">
+    <h2>Water Usage</h2>
+    {{ water_form.as_p }}
+  </div>
+  <div class="mb-3">
+    <h2>Waste Management</h2>
+    {{ waste_form.as_p }}
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
 {% endblock %}

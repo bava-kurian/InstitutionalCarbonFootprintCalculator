@@ -4,19 +4,19 @@ from .models import EnergyConsumption, Transportation, WaterUsage, WasteManageme
 class EnergyConsumptionForm(forms.ModelForm):
     class Meta:
         model = EnergyConsumption
-        exclude = ['yearly_data']
+        fields = '__all__'
 
 class TransportationForm(forms.ModelForm):
     class Meta:
         model = Transportation
-        exclude = ['yearly_data']
+        fields = '__all__'
 
 class WaterUsageForm(forms.ModelForm):
     class Meta:
         model = WaterUsage
-        exclude = ['yearly_data']
+        fields = '__all__'
 
 class WasteManagementForm(forms.ModelForm):
     class Meta:
         model = WasteManagement
-        exclude = ['yearly_data']
+        fields = '__all__'
