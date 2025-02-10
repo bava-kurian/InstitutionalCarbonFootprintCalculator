@@ -1,43 +1,12 @@
-<!-- filepath: /d:/mini proj worl/InstitutionalCarbonFootprintCalculator/CarbonFootprint/users/templates/users/register.html -->
-{% extends "main_app/base.html" %}
-
-{% block title %}Register{% endblock %}
-
-{% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header text-center">
-                    <h1 class="mb-4">Register</h1>
-                </div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        {% if user_form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                {{ user_form.non_field_errors }}
-                            </div>
-                        {% endif %}
-                        <h2>User Details</h2>
-                        {{ user_form.as_p }}
-                        {% if institution_form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                {{ institution_form.non_field_errors }}
-                            </div>
-                        {% endif %}
-                        <h2>Institution Details</h2>
-                        {{ institution_form.as_p }}
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Register</button>
-                        </div>
-                    </form>
-                    <p class="mt-3 text-center">
-                        Already have an account? <a href="{% url 'login' %}">Login here</a>.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+{% extends "main_app/base.html" %} {% block title %}Register{% endblock %}
+{%block content %}
+<h1 class="mb-4">Register</h1>
+<form method="post">
+  {% csrf_token %}
+  <h2>User Details</h2>
+  {{ user_form.as_p }}
+  <h2>Institution Details</h2>
+  {{ institution_form.as_p }}
+  <button type="submit" class="btn btn-primary">Register</button>
+</form>
 {% endblock %}
