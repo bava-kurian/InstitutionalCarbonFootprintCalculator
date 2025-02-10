@@ -1,0 +1,74 @@
+[User]
+id: integer
+username: string
+email: string
+password: string
+
+[Institution]
+id: integer
+name: string
+email: string
+password: string
+type: string
+address: string
+city: string
+country: string
+contact_number: string
+date_registered: datetime
+user_id: integer
+
+[EmissionFactor]
+id: integer
+category: string
+factor: float
+
+[CollegeDetails]
+id: integer
+name: string
+city: string
+total_campus_area: float
+total_builtup_area: float
+lawn_garden_area: float
+undeveloped_land_area: float
+user_id: integer
+
+[EnergyConsumption]
+id: integer
+year: integer
+electricity_kwh: float
+solar_generation_kwh: float
+generator_fuel_liters: float
+user_id: integer
+
+[Transportation]
+id: integer
+year: integer
+total_students_staff: integer
+distance_by_bus_km: float
+distance_by_personal_vehicles_km: float
+distance_by_public_transport_km: float
+distance_by_ev_km: float
+user_id: integer
+
+[WaterUsage]
+id: integer
+year: integer
+water_consumed_kl: float
+rainwater_harvesting_capacity: float
+wastewater_treated_kl: float
+user_id: integer
+
+[WasteManagement]
+id: integer
+year: integer
+waste_generated_tonnes: float
+waste_treated_tonnes: float
+waste_to_landfill_tonnes: float
+user_id: integer
+
+[User] ||--o{ [Institution]
+[User] ||--o{ [CollegeDetails]
+[User] ||--o{ [EnergyConsumption]
+[User] ||--o{ [Transportation]
+[User] ||--o{ [WaterUsage]
+[User] ||--o{ [WasteManagement]

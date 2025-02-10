@@ -1,11 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,HttpResponse
 from .models import EmissionFactor, CollegeDetails, EnergyConsumption, Transportation, WaterUsage, WasteManagement
 from .forms import EnergyConsumptionForm, TransportationForm, WaterUsageForm, WasteManagementForm
 from .utils import calculate_emissions
 from django.contrib.auth.decorators import login_required
 
 
-@login_required
+def base_view(request):
+    return render(request, 'main_app/base.html');
 def home(request):
     energy_data = EnergyConsumption.objects.filter(user=request.user)
     transportation_data = Transportation.objects.filter(user=request.user)
@@ -20,6 +21,7 @@ def home(request):
     }
 
     return render(request, 'main_app/home.html', context)
+@login_required
 def input_data(request):
     if request.method == 'POST':
         print("POST data:", request.POST)  # Print the posted data
