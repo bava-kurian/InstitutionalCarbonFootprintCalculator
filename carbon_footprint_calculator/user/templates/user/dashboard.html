@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1>Welcome, {{ user.username }}</h1>
+<h2>Your Emissions Data</h2>
+
+<div class="card-container">
+    {% for emission in emissions %}
+    <a href="{% url 'results' emission.id %}" class="card mb-3 text-decoration-none text-dark">
+        <div class="card-body">
+            <h3 class="card-title">Year: {{ emission.year }}</h3>
+            <p class="card-text">Total Emissions: {{ emission.total_emissions }}</p>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+
+<div class="text-center">
+    <a href="{% url 'input_data' %}" class="btn btn-success">Add new Calculations</a>
+</div>
+
+<h2>Institution Details</h2>
+<p>Name: {{ institution.name }}</p>
+<p>Type: {{ institution.institution_type }}</p>
+<p>Address: {{ institution.address }}</p>
+<p>City: {{ institution.city }}</p>
+<p>Country: {{ institution.country }}</p>
+<p>Contact: {{ institution.contact_number }}</p>
+<a href="{% url 'edit_institution' %}" class="btn btn-warning">Edit Institution Details</a>
+
+{% endblock %}

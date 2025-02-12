@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<h1>Welcome to the Carbon Footprint Calculator</h1>
+<p>
+    The Carbon Footprint Calculator is a tool designed to help you understand and reduce your carbon footprint. 
+    By tracking your energy consumption, fuel usage, transportation habits, water usage, and waste management, 
+    you can gain insights into your environmental impact and take steps to minimize it.
+</p>
+<p>
+    Understanding your carbon footprint is crucial in the fight against climate change. By making small changes in 
+    your daily habits, you can contribute to a more sustainable future.
+</p>
+<div class="text-center">
+    {% if user.is_authenticated %}
+    <a href="{% url 'input_data' %}" class="btn btn-success">Start Calculation</a>
+    {%else%}
+    <a href="{% url 'register' %}" class="btn btn-success">Get Started</a>
+    {% endif %}
+</div>
+{% endblock %}

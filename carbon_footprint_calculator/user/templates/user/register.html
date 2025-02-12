@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}User Registration{% endblock %}
+
+{% block content %}
+<h1>User Registration</h1>
+<form method="post" class="text-center border p-4 rounded">
+    {% csrf_token %}
+    {{ user_form.as_p }}
+    <button type="submit" class="btn btn-primary">Register</button>
+</form>
+<p class="text-center">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordFields = document.querySelectorAll('input[type="password"]');
+        passwordFields.forEach(field => {
+            const showPassword = document.createElement('input');
+            showPassword.type = 'checkbox';
+            showPassword.id = 'showPassword';
+            const label = document.createElement('label');
+            label.htmlFor = 'showPassword';
+            label.innerText = ' Show Password';
+            field.parentNode.appendChild(showPassword);
+            field.parentNode.appendChild(label);
+            showPassword.addEventListener('change', function() {
+                field.type = this.checked ? 'text' : 'password';
+            });
+        });
+    });
+</script>
+{% endblock %}
