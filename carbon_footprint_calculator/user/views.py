@@ -3,18 +3,23 @@ from django.contrib.auth import login as auth_login, authenticate
 from django.contrib.auth.decorators import login_required
 from .models import Institution, User
 from .forms import InstitutionForm, UserRegistrationForm, LoginForm
+from emissions.models import EmissionData  # Import EmissionData model
 
 def home(request):
     return render(request, 'user/home.html')
 
 @login_required
 def dashboard(request):
-    user = request.user
-    emissions = user.emissiondata_set.all()
-    institution = Institution.objects.get(user=user)
+    try:
+        institution = request.user.institution
+    except Institution.DoesNotExist:
+        return redirect('institution_register')
+    
+    emissions = EmissionData.objects.filter(user=request.user)  # Fetch emissions data for the user
+    
     return render(request, 'user/dashboard.html', {
-        'emissions': emissions,
-        'institution': institution
+        'institution': institution,
+        'emissions': emissions  # Pass emissions data to the template
     })
 
 def register(request):
@@ -26,9 +31,12 @@ def register(request):
             user.save()
             auth_login(request, user)
             return redirect('institution_register')
+        else:
+            errors = user_form.errors
     else:
         user_form = UserRegistrationForm()
-    return render(request, 'user/register.html', {'user_form': user_form})
+        errors = None
+    return render(request, 'user/register.html', {'user_form': user_form, 'errors': errors})
 
 @login_required
 def institution_register(request):

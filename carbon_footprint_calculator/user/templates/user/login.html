@@ -3,11 +3,21 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
+<style>
+    ul {
+        border: 1px solid red;
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+        list-style-type: none;
+    }
+</style>
 <h1>Login</h1>
 <form method="post" class="text-center border p-4 rounded">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Login</button>
+    <button type="submit" class="cta-button">Login</button>
 </form>
 <p class="text-center">Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
 <script>
