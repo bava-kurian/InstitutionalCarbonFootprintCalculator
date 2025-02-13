@@ -2,7 +2,8 @@
 
 {% block title %}User Registration{% endblock %}
 
-{% block content %}<style>
+{% block content %}
+<style>
     ul {
         border: 1px solid red;
         color: red;
@@ -15,7 +16,18 @@
 <form method="post" class="text-center border p-4 rounded">
     {% csrf_token %}
     {{ user_form.as_p }}
-    
+    {% if user_form.errors %}
+        <ul>
+            {% for field in user_form %}
+                {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in user_form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
     <button type="submit" class="cta-button">Register</button>
 </form>
 <p class="text-center">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
