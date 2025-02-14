@@ -3,6 +3,16 @@
 {% block title %}Institution Registration{% endblock %}
 
 {% block content %}
+<style>
+    ul {
+        border: 1px solid red;
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+        list-style-type: none;
+    }
+</style>
 <h1>Institution Registration</h1>
 <form method="post" class="text-center border p-4 rounded">
     {% csrf_token %}

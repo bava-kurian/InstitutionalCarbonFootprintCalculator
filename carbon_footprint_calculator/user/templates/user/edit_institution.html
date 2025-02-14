@@ -3,6 +3,16 @@
 {% block title %}Edit Institution{% endblock %}
 
 {% block content %}
+<style>
+    ul {
+        border: 1px solid red;
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+        list-style-type: none;
+    }
+</style>
 <h1>Edit Institution Details</h1>
 <form method="post">
     {% csrf_token %}

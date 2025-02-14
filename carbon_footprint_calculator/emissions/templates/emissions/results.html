@@ -19,8 +19,13 @@
 <br>
 <a href="{% url 'edit_data' emission_data.id %}" class="cta-button">Edit</a>
 <br><br>
+<br>
+<a href="{% url 'render_pdf_view' emission_data.id %}" class="cta-button">Download PDF</a>
+<br><br>
 <h2>Charts</h2>
-<canvas id="emissionsChart"></canvas>
+<div style="width: 500px; height: 500px; margin: auto;">
+    <canvas id="emissionsChart"></canvas>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
