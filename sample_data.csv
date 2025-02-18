@@ -1,0 +1,3 @@
+year,electricity_kwh,solar_generation_kwh,generator_fuel_liters,diesel_liters,petrol_liters,lpg_kg,distance_by_bus_km,distance_by_personal_km,distance_by_public_km,distance_by_ev_km,water_consumed_kl,wastewater_treated_kl,organic_waste_kg,plastic_waste_kg,sewage_liters
+2023,1000,200,50,300,150,100,500,200,300,100,1000,500,200,100,300
+2024,1100,250,60,320,160,110,520,210,310,110,1100,550,210,110,310

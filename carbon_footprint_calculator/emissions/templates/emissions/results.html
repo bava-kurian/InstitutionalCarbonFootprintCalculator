@@ -3,28 +3,47 @@
 {% block title %}Results{% endblock %}
 
 {% block content %}
-<h1>Results for Year: {{ emission_data.year }}</h1>
-<p>Total Emissions: {{ total_emissions }}</p>
+<div class="results-container">
+    <div class="results-left">
+        <h1>Results for Year: {{ emission_data.year }}</h1>
+        <p>Total Emissions: {{ total_emissions }}</p>
 
-<h2>Breakdown</h2>
-<ul>
-    <li>Electricity Emissions: {{ electricity_emissions }}</li>
-    <li>Diesel Emissions: {{ diesel_emissions }}</li>
-    <li>Petrol Emissions: {{ petrol_emissions }}</li>
-    <li>LPG Emissions: {{ lpg_emissions }}</li>
-    <li>Public Transport Emissions: {{ public_transport_emissions }}</li>
-    <li>Water Supply Emissions: {{ water_supply_emissions }}</li>
-    <li>Plastic Waste Emissions: {{ plastic_waste_emissions }}</li>
-</ul>
-<br>
-<a href="{% url 'edit_data' emission_data.id %}" class="cta-button">Edit</a>
-<br><br>
-<br>
-<a href="{% url 'render_pdf_view' emission_data.id %}" class="cta-button">Download PDF</a>
-<br><br>
-<h2>Charts</h2>
-<div style="width: 500px; height: 500px; margin: auto;">
-    <canvas id="emissionsChart"></canvas>
+        <h2>Breakdown</h2>
+        <ul>
+            <li>Electricity Emissions: {{ electricity_emissions }}</li>
+            <li>Diesel Emissions: {{ diesel_emissions }}</li>
+            <li>Petrol Emissions: {{ petrol_emissions }}</li>
+            <li>LPG Emissions: {{ lpg_emissions }}</li>
+            <li>Public Transport Emissions: {{ public_transport_emissions }}</li>
+            <li>Water Supply Emissions: {{ water_supply_emissions }}</li>
+            <li>Plastic Waste Emissions: {{ plastic_waste_emissions }}</li>
+        </ul>
+        <br>
+        <a href="{% url 'edit_data' emission_data.id %}" class="cta-button">Edit</a>
+        <br><br>
+        <a href="{% url 'render_pdf_view' emission_data.id %}" class="cta-button">Download PDF</a>
+        <br><br>
+        <h2>Charts</h2>
+        <div style="width: 500px; height: 500px; margin: auto;">
+            <canvas id="emissionsChart"></canvas>
+        </div>
+    </div>
+    <div class="results-right">
+        <h2>Suggestions</h2>
+        <div class="chat-container">
+            <div id="chat-box">
+                {% for suggestion in suggestions %}
+                    <div class="chat-message">
+                        <div class="message-content">{{ suggestion }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="chat-input">
+                <input type="text" id="user-query" placeholder="Ask a question...">
+                <button onclick="sendQuery()">Send</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -87,6 +106,29 @@
             }
         }
     });
+
+    function sendQuery() {
+        var query = document.getElementById('user-query').value;
+        if (query) {
+            var chatBox = document.getElementById('chat-box');
+            var userMessage = document.createElement('div');
+            userMessage.className = 'chat-message user-message';
+            userMessage.innerHTML = '<div class="message-content">' + query + '</div>';
+            chatBox.appendChild(userMessage);
+            document.getElementById('user-query').value = '';
+
+            // Send query to the server
+            fetch(`/emissions/handle_query/?query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    var responseMessage = document.createElement('div');
+                    responseMessage.className = 'chat-message';
+                    responseMessage.innerHTML = '<div class="message-content">' + data.response + '</div>';
+                    chatBox.appendChild(responseMessage);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                });
+        }
+    }
 </script>
 
 {% endblock %}
