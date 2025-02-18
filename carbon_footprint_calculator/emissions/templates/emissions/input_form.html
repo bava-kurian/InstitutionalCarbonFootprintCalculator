@@ -14,7 +14,7 @@
     }
 </style>
 <h1>Input Emissions Data</h1>
-<form method="post" class="text-center border p-4 rounded" enctype="multipart/form-data">
+<form method="post" class="text-center border p-4 rounded">
     {% csrf_token %}
     <h2>General Information</h2>
     {{ emi_data_form.as_p }}
@@ -28,48 +28,6 @@
     {{ water_form.as_p }}
     <h2>Waste Management</h2>
     {{ waste_form.as_p }}
-    <input type="file" id="csvFileInput" name="csv_file" accept=".csv">
-    <button type="button" class="cta-button" onclick="uploadCSV()">Upload CSV</button>
     <button type="submit" class="cta-button">Submit</button>
 </form>
-
-<script>
-    function uploadCSV() {
-        const input = document.getElementById('csvFileInput');
-        const file = input.files[0];
-        const reader = new FileReader();
-
-        reader.onload = function(e) {
-            const text = e.target.result;
-            const data = parseCSV(text);
-            populateForm(data);
-            console.log(data);
-        };
-
-        reader.readAsText(file);
-    }
-
-    function parseCSV(text) {
-        const lines = text.split('\n');
-        const result = {};
-        lines.forEach(line => {
-            if (line.trim()) {
-                const [key, value] = line.split(',');
-                if (key) {
-                    result[key.trim()] = value ? value.trim() : '';
-                }
-            }
-        });
-        return result;
-    }
-
-    function populateForm(data) {
-        for (const key in data) {
-            const input = document.querySelector(`[name="${key}"]`);
-            if (input) {
-                input.value = data[key];
-            }
-        }
-    }
-</script>
 {% endblock %}

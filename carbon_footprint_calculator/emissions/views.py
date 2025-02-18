@@ -1,10 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
 from .models import EmissionData, EmissionFactor, EnergyConsumption, FuelConsumption, Transportation, WaterUsage, WasteManagement
 from .forms import EmissionDataForm, EnergyConsumptionForm, FuelConsumptionForm, TransportationForm, WaterUsageForm, WasteManagementForm
-import csv
-from django.http import HttpResponse
 
 @login_required
 def input_data(request):
@@ -25,52 +22,12 @@ def input_data(request):
         waste = None
 
     if request.method == 'POST':
-        if 'csv_file' in request.FILES:
-            csv_file = request.FILES['csv_file']
-            if not csv_file.name.endswith('.csv'):
-                return HttpResponse("Please upload a valid CSV file.")
-            
-            decoded_file = csv_file.read().decode('utf-8').splitlines()
-            reader = csv.DictReader(decoded_file)
-            for row in reader:
-                if row['year'] == year:
-                    emi_data_form = EmissionDataForm({
-                        'year': row['year'],
-                        'user': request.user.id
-                    }, instance=emission_data)
-                    energy_form = EnergyConsumptionForm({
-                        'electricity_kwh': row['electricity_kwh'],
-                        'solar_generation_kwh': row['solar_generation_kwh'],
-                        'generator_fuel_liters': row['generator_fuel_liters']
-                    }, instance=energy)
-                    fuel_form = FuelConsumptionForm({
-                        'diesel_liters': row['diesel_liters'],
-                        'petrol_liters': row['petrol_liters'],
-                        'lpg_kg': row['lpg_kg']
-                    }, instance=fuel)
-                    transport_form = TransportationForm({
-                        'distance_by_bus_km': row['distance_by_bus_km'],
-                        'distance_by_personal_km': row['distance_by_personal_km'],
-                        'distance_by_public_km': row['distance_by_public_km'],
-                        'distance_by_ev_km': row['distance_by_ev_km']
-                    }, instance=transport)
-                    water_form = WaterUsageForm({
-                        'water_consumed_kl': row['water_consumed_kl'],
-                        'wastewater_treated_kl': row['wastewater_treated_kl']
-                    }, instance=water)
-                    waste_form = WasteManagementForm({
-                        'organic_waste_kg': row['organic_waste_kg'],
-                        'plastic_waste_kg': row['plastic_waste_kg'],
-                        'sewage_liters': row['sewage_liters']
-                    }, instance=waste)
-                    break
-        else:
-            emi_data_form = EmissionDataForm(request.POST, instance=emission_data)
-            energy_form = EnergyConsumptionForm(request.POST, instance=energy)
-            fuel_form = FuelConsumptionForm(request.POST, instance=fuel)
-            transport_form = TransportationForm(request.POST, instance=transport)
-            water_form = WaterUsageForm(request.POST, instance=water)
-            waste_form = WasteManagementForm(request.POST, instance=waste)
+        emi_data_form = EmissionDataForm(request.POST, instance=emission_data)
+        energy_form = EnergyConsumptionForm(request.POST, instance=energy)
+        fuel_form = FuelConsumptionForm(request.POST, instance=fuel)
+        transport_form = TransportationForm(request.POST, instance=transport)
+        water_form = WaterUsageForm(request.POST, instance=water)
+        waste_form = WasteManagementForm(request.POST, instance=waste)
 
         if (emi_data_form.is_valid() and energy_form.is_valid() and fuel_form.is_valid() and
             transport_form.is_valid() and water_form.is_valid() and waste_form.is_valid()):
@@ -214,8 +171,6 @@ def results(request, emi_data_id):
     emission_data.plastic_waste_emissions = plastic_waste_emissions
     emission_data.save()
 
-
-
     context = {
         'emission_data': emission_data,
         'electricity_emissions': electricity_emissions,
@@ -226,7 +181,6 @@ def results(request, emi_data_id):
         'water_supply_emissions': water_supply_emissions,
         'plastic_waste_emissions': plastic_waste_emissions,
         'total_emissions': total_emissions,
-        'suggestions': suggestions,
     }
     return render(request, 'emissions/results.html', context)
 
