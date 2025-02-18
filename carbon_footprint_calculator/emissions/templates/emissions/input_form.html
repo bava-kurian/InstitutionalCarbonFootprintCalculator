@@ -14,7 +14,7 @@
     }
 </style>
 <h1>Input Emissions Data</h1>
-<form method="post" class="text-center border p-4 rounded">
+<form method="post" enctype="multipart/form-data" class="text-center border p-4 rounded">
     {% csrf_token %}
     <h2>General Information</h2>
     {{ emi_data_form.as_p }}
@@ -24,10 +24,13 @@
     {{ fuel_form.as_p }}
     <h2>Transportation</h2>
     {{ transport_form.as_p }}
-    <h2>Water Usage</h2>
+    <h2>Water Usage</h1>
     {{ water_form.as_p }}
     <h2>Waste Management</h2>
     {{ waste_form.as_p }}
+    <h2>Upload CSV</h2>
+    <input type="file" name="csv_file" accept=".csv">
+    <br><br>
     <button type="submit" class="cta-button">Submit</button>
 </form>
 {% endblock %}
