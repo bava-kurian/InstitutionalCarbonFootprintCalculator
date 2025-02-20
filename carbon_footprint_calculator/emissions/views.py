@@ -6,6 +6,7 @@ import csv
 from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
+from datetime import datetime
 
 @login_required
 def input_data(request):
@@ -174,6 +175,7 @@ def edit_data(request, emi_data_id):
 @login_required
 def results(request, emi_data_id):
     emission_data = get_object_or_404(EmissionData, pk=emi_data_id)
+    current_year = datetime.now().year
 
     # Ensure there is at least one EmissionFactor entry
     factors = EmissionFactor.objects.first()
@@ -225,6 +227,7 @@ def results(request, emi_data_id):
         'water_supply_emissions': water_supply_emissions,
         'plastic_waste_emissions': plastic_waste_emissions,
         'total_emissions': total_emissions,
+        'current_year': current_year,
     }
     return render(request, 'emissions/results.html', context)
 

@@ -28,6 +28,9 @@
                 <div class="card-body">
                     <h3 class="card-title">Year: {{ emission.year }}</h3>
                     <p class="card-text">Total Emissions: {{ emission.total_emissions }}</p>
+                    {% if emission.year == current_year %}
+                    <a href="{% url 'edit_data' emission.id %}" class="cta-button" style="background-color: #4CAF50; color: white; padding: 2px 5px;">Edit</a>
+                    {% endif %}
                 </div>
             </a>
             {% endfor %}

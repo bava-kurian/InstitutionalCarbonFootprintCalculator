@@ -4,20 +4,22 @@
 
 {% block content %}
 <h1>Results for Year: {{ emission_data.year }}</h1>
-<p>Total Emissions: {{ total_emissions }}</p>
+<p>Total Emissions: {{ total_emissions }}kg Co2</p>
 
 <h2>Breakdown</h2>
 <ul>
-    <li>Electricity Emissions: {{ electricity_emissions }}</li>
-    <li>Diesel Emissions: {{ diesel_emissions }}</li>
-    <li>Petrol Emissions: {{ petrol_emissions }}</li>
-    <li>LPG Emissions: {{ lpg_emissions }}</li>
-    <li>Public Transport Emissions: {{ public_transport_emissions }}</li>
-    <li>Water Supply Emissions: {{ water_supply_emissions }}</li>
-    <li>Plastic Waste Emissions: {{ plastic_waste_emissions }}</li>
+    <li>Electricity Emissions: {{ electricity_emissions }}kg Co2</li>
+    <li>Diesel Emissions: {{ diesel_emissions }}kg Co2</li>
+    <li>Petrol Emissions: {{ petrol_emissions }}kg Co2</li>
+    <li>LPG Emissions: {{ lpg_emissions }}kg Co2</li>
+    <li>Public Transport Emissions: {{ public_transport_emissions }}kg Co2</li>
+    <li>Water Supply Emissions: {{ water_supply_emissions }}kg Co2</li>
+    <li>Plastic Waste Emissions: {{ plastic_waste_emissions }}kg Co2</li>
 </ul>
 <br>
+{% if emission_data.year == current_year %}
 <a href="{% url 'edit_data' emission_data.id %}" class="cta-button">Edit</a>
+{% endif %}
 <br><br>
 <br>
 <a href="{% url 'download_pdf' emission_data.id %}" class="cta-button">Download PDF</a>
