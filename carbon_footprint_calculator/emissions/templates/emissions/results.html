@@ -7,17 +7,46 @@
 <p>Total Emissions: {{ total_emissions }}kg Co2</p>
 
 <h2>Breakdown</h2>
-<ul>
-    <li>Electricity Emissions: {{ electricity_emissions }}kg Co2</li>
-    <li>Diesel Emissions: {{ diesel_emissions }}kg Co2</li>
-    <li>Petrol Emissions: {{ petrol_emissions }}kg Co2</li>
-    <li>LPG Emissions: {{ lpg_emissions }}kg Co2</li>
-    <li>Public Transport Emissions: {{ public_transport_emissions }}kg Co2</li>
-    <li>Water Supply Emissions: {{ water_supply_emissions }}kg Co2</li>
-    <li>Plastic Waste Emissions: {{ plastic_waste_emissions }}kg Co2</li>
-</ul>
+<table style="border-collapse: collapse; width: 100%;">
+    <thead>
+        <tr>
+            <th style="border: 1px solid #ddd; padding: 8px;">Source</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Emissions (kg CO2e)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">Electricity</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ electricity_emissions }}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">Diesel</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ diesel_emissions }}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">Petrol</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ petrol_emissions }}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">LPG</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ lpg_emissions }}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">Public Transport</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ public_transport_emissions }}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">Water Supply</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ water_supply_emissions }}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">Plastic Waste</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ plastic_waste_emissions }}</td>
+        </tr>
+    </tbody>
+</table>
 <br>
-{% if emission_data.year == current_year %}
+{% if emission_data.year >= current_year %}
 <a href="{% url 'edit_data' emission_data.id %}" class="cta-button">Edit</a>
 {% endif %}
 <br><br>
