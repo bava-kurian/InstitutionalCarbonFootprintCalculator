@@ -28,6 +28,8 @@
     {{ water_form.as_p }}
     <h2>Waste Management</h2>
     {{ waste_form.as_p }}
+    <h2>Paper Usage</h2>
+    {{ paper_form.as_p }}
     <h2>Upload CSV</h2>
     <input type="file" id="csvFileInput" accept=".csv">
     <br><br>
@@ -39,8 +41,8 @@
 <script>
     function downloadSampleCSV() {
         const sampleData = [
-            ["year", "electricity_kwh", "solar_generation_kwh", "generator_fuel_liters", "diesel_liters", "petrol_liters", "lpg_kg", "distance_by_bus_km", "distance_by_personal_km", "distance_by_public_km", "distance_by_ev_km", "water_consumed_kl", "wastewater_treated_kl", "organic_waste_kg", "plastic_waste_kg", "sewage_liters"],
-            ["2023", "1000", "200", "50", "300", "400", "100", "500", "600", "700", "800", "900", "1000", "1100", "1200", "1300"]
+            ["year", "electricity_kwh", "solar_generation_kwh", "generator_fuel_liters", "diesel_liters", "petrol_liters", "lpg_kg", "distance_by_bus_km", "distance_by_personal_km", "distance_by_public_km", "distance_by_ev_km", "water_consumed_kl", "wastewater_treated_kl", "organic_waste_kg", "plastic_waste_kg", "sewage_liters", "ewaste_kg", "paper_kg"],
+            ["2023", "1000", "200", "50", "300", "400", "100", "500", "600", "700", "800", "900", "1000", "1100", "1200", "1300", "1400", "1500"]
         ];
         let csvContent = "data:text/csv;charset=utf-8," + sampleData.map(e => e.join(",")).join("\n");
         const encodedUri = encodeURI(csvContent);
