@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Input Emissions Data{% endblock %}
+
+{% block content %}
+<style>
+    ul {
+        border: 1px solid red;
+        color: red;
+        background-color: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+        list-style-type: none;
+    }
+</style>
+<h1>Input Emissions Data</h1>
+<form method="post" enctype="multipart/form-data" class="text-center border p-4 rounded">
+    {% csrf_token %}
+    <h2>General Information</h2>
+    {{ emi_data_form.as_p }}
+    <h2>Energy Consumption</h2>
+    {{ energy_form.as_p }}
+    <h2>Fuel Consumption</h2>
+    {{ fuel_form.as_p }}
+    <h2>Transportation</h2>
+    {{ transport_form.as_p }}
+    <h2>Water Usage</h2>
+    {{ water_form.as_p }}
+    <h2>Waste Management</h2>
+    {{ waste_form.as_p }}
+    <h2>Paper Usage</h2>
+    {{ paper_form.as_p }}
+    <h2>Upload CSV</h2>
+    <input type="file" id="csvFileInput" accept=".csv">
+    <br><br>
+    <button type="button" onclick="downloadSampleCSV()">Download Sample CSV</button>
+    <br><br>
+    <button type="submit" class="cta-button">Submit</button>
+</form>
+
+<script>
+    function downloadSampleCSV() {
+        const sampleData = [
+            ["year", "electricity_kwh", "solar_generation_kwh", "generator_fuel_liters", "diesel_liters", "petrol_liters", "lpg_kg", "distance_by_bus_km", "distance_by_personal_km", "distance_by_public_km", "distance_by_ev_km", "water_consumed_kl", "wastewater_treated_kl", "organic_waste_kg", "plastic_waste_kg", "sewage_liters", "ewaste_kg", "paper_kg"],
+            ["2023", "1000", "200", "50", "300", "400", "100", "500", "600", "700", "800", "900", "1000", "1100", "1200", "1300", "1400", "1500"]
+        ];
+        let csvContent = "data:text/csv;charset=utf-8," + sampleData.map(e => e.join(",")).join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "sample_emissions_data.csv");
+        document.body.appendChild(link);
+        link.click();
+    }
+
+    document.getElementById('csvFileInput').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const data = CSVToArray(text);
+                populateForm(data);
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    function CSVToArray(strData, strDelimiter = ",") {
+        const objPattern = new RegExp(
+            (
+                "(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
+                "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+                "([^\"\\" + strDelimiter + "\\r\\n]*))"
+            ),
+            "gi"
+        );
+        const arrData = [[]];
+        let arrMatches = null;
+        while (arrMatches = objPattern.exec(strData)) {
+            const strMatchedDelimiter = arrMatches[1];
+            if (strMatchedDelimiter.length && strMatchedDelimiter !== strDelimiter) {
+                arrData.push([]);
+            }
+            const strMatchedValue = arrMatches[2] ? arrMatches[2].replace(new RegExp("\"\"", "g"), "\"") : arrMatches[3];
+            arrData[arrData.length - 1].push(strMatchedValue);
+        }
+        return arrData;
+    }
+
+    function populateForm(data) {
+        const headers = data[0];
+        const values = data[1];
+        headers.forEach((header, index) => {
+            const input = document.querySelector(`[name=${header}]`);
+            if (input) {
+                input.value = values[index];
+            }
+        });
+    }
+</script>
+{% endblock %}
