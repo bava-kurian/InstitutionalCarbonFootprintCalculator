@@ -7,6 +7,7 @@
 <p>Total Emissions: {{ total_emissions }}kg Co2</p>
 
 <h2>Breakdown</h2>
+<h3>Scope 1: Direct Emissions</h3>
 <table style="border-collapse: collapse; width: 100%;">
     <thead>
         <tr>
@@ -15,10 +16,6 @@
         </tr>
     </thead>
     <tbody>
-        <tr>
-            <td style="border: 1px solid #ddd; padding: 8px;">Electricity</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ electricity_emissions }}</td>
-        </tr>
         <tr>
             <td style="border: 1px solid #ddd; padding: 8px;">Diesel</td>
             <td style="border: 1px solid #ddd; padding: 8px;">{{ diesel_emissions }}</td>
@@ -31,6 +28,34 @@
             <td style="border: 1px solid #ddd; padding: 8px;">LPG</td>
             <td style="border: 1px solid #ddd; padding: 8px;">{{ lpg_emissions }}</td>
         </tr>
+    </tbody>
+</table>
+
+<h3>Scope 2: Indirect Emissions</h3>
+<table style="border-collapse: collapse; width: 100%;">
+    <thead>
+        <tr>
+            <th style="border: 1px solid #ddd; padding: 8px;">Source</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Emissions (kg CO2e)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">Electricity</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ electricity_emissions }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>Scope 3: Other Indirect Emissions</h3>
+<table style="border-collapse: collapse; width: 100%;">
+    <thead>
+        <tr>
+            <th style="border: 1px solid #ddd; padding: 8px;">Source</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Emissions (kg CO2e)</th>
+        </tr>
+    </thead>
+    <tbody>
         <tr>
             <td style="border: 1px solid #ddd; padding: 8px;">Public Transport</td>
             <td style="border: 1px solid #ddd; padding: 8px;">{{ public_transport_emissions }}</td>
@@ -46,6 +71,10 @@
         <tr>
             <td style="border: 1px solid #ddd; padding: 8px;">Paper Usage</td>
             <td style="border: 1px solid #ddd; padding: 8px;">{{ paper_emissions }}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">E-Waste</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ ewaste_emissions }}</td>
         </tr>
     </tbody>
 </table>
@@ -69,7 +98,7 @@
     var emissionsChart = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: ['Electricity', 'Diesel', 'Petrol', 'LPG', 'Public Transport', 'Water Supply', 'Plastic Waste', 'Paper Usage'],
+            labels: ['Electricity', 'Diesel', 'Petrol', 'LPG', 'Public Transport', 'Water Supply', 'Plastic Waste', 'Paper Usage', 'E-Waste'],
             datasets: [{
                 label: 'Emissions (kg CO2e)',
                 data: [
@@ -80,7 +109,8 @@
                     {{ public_transport_emissions }},
                     {{ water_supply_emissions }},
                     {{ plastic_waste_emissions }},
-                    {{ paper_emissions }}
+                    {{ paper_emissions }},
+                    {{ ewaste_emissions }}
                 ],
                 backgroundColor: [
                     'rgba(75, 192, 192, 0.2)',
@@ -90,7 +120,8 @@
                     'rgba(153, 102, 255, 0.2)',
                     'rgba(255, 159, 64, 0.2)',
                     'rgba(255, 99, 132, 0.2)',
-                    'rgba(255, 205, 86, 0.2)'
+                    'rgba(255, 205, 86, 0.2)',
+                    'rgba(201, 203, 207, 0.2)'
                 ],
                 borderColor: [
                     'rgba(75, 192, 192, 1)',
@@ -100,7 +131,8 @@
                     'rgba(153, 102, 255, 1)',
                     'rgba(255, 159, 64, 1)',
                     'rgba(255, 99, 132, 1)',
-                    'rgba(255, 205, 86, 1)'
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(201, 203, 207, 1)'
                 ],
                 borderWidth: 1
             }]
