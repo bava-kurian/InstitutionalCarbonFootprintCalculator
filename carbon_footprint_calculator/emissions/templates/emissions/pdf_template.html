@@ -15,14 +15,12 @@
     <h1>Emission Report for Year: {{ emission_data.year }}</h1>
     <p>Total Emissions: {{ total_emissions }} kg CO2e</p>
     <h2>Breakdown</h2>
+    
+    <h3>Scope 1: Direct Emissions</h3>
     <table>
         <tr>
             <th>Category</th>
             <th>Emissions (kg CO2e)</th>
-        </tr>
-        <tr>
-            <td>Electricity</td>
-            <td>{{ electricity_emissions }}</td>
         </tr>
         <tr>
             <td>Diesel</td>
@@ -36,6 +34,26 @@
             <td>LPG</td>
             <td>{{ lpg_emissions }}</td>
         </tr>
+    </table>
+    
+    <h3>Scope 2: Indirect Emissions</h3>
+    <table>
+        <tr>
+            <th>Category</th>
+            <th>Emissions (kg CO2e)</th>
+        </tr>
+        <tr>
+            <td>Electricity</td>
+            <td>{{ electricity_emissions }}</td>
+        </tr>
+    </table>
+    
+    <h3>Scope 3: Other Indirect Emissions</h3>
+    <table>
+        <tr>
+            <th>Category</th>
+            <th>Emissions (kg CO2e)</th>
+        </tr>
         <tr>
             <td>Public Transport</td>
             <td>{{ public_transport_emissions }}</td>
@@ -47,6 +65,10 @@
         <tr>
             <td>Plastic Waste</td>
             <td>{{ plastic_waste_emissions }}</td>
+        </tr>
+        <tr>
+            <td>E-Waste</td>
+            <td>{{ ewaste_emissions }}</td>
         </tr>
     </table>
 </body>

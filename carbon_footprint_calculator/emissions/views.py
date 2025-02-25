@@ -203,7 +203,7 @@ def results(request, emi_data_id):
         factors = EmissionFactor.objects.create(
             electricity=0.5, diesel=2.68, petrol=2.31, lpg=1.5, water_supply=0.344,
             wastewater_treatment=0.2, organic_waste=0.1, plastic_waste=6.0,
-            sewage_treatment=0.3, paper=1.5, refrigerant_gwp=1000
+            sewage_treatment=0.3, paper=1.5, refrigerant_gwp=1000,ewaste=1.0,
         )
 
     energy = emission_data.energyconsumption
@@ -221,6 +221,7 @@ def results(request, emi_data_id):
     water_supply_emissions = water.water_consumed_kl * 0.344
     plastic_waste_emissions = waste.plastic_waste_kg * 6.0
     paper_emissions = paper.paper_kg * factors.paper
+    ewaste_emissions = waste.ewaste_kg * factors.ewaste
 
     total_emissions = (
         electricity_emissions + diesel_emissions + petrol_emissions +
@@ -237,6 +238,7 @@ def results(request, emi_data_id):
     emission_data.water_supply_emissions = water_supply_emissions
     emission_data.plastic_waste_emissions = plastic_waste_emissions
     emission_data.paper_emissions = paper_emissions
+    emission_data.ewaste_emissions = ewaste_emissions
     emission_data.save()
 
     context = {
@@ -251,6 +253,7 @@ def results(request, emi_data_id):
         'paper_emissions': paper_emissions,
         'total_emissions': total_emissions,
         'current_year': current_year,
+        'ewaste_emissions': emission_data.ewaste_emissions,
     }
     return render(request, 'emissions/results.html', context)
 
@@ -268,6 +271,7 @@ def download_pdf(request, emi_data_id):
         'plastic_waste_emissions': emission_data.plastic_waste_emissions,
         'paper_emissions': emission_data.paper_emissions,
         'total_emissions': emission_data.total_emissions,
+        'ewaste_emissions': emission_data.ewaste_emissions,
     }
     template_path = 'emissions/pdf_template.html'
     response = HttpResponse(content_type='application/pdf')

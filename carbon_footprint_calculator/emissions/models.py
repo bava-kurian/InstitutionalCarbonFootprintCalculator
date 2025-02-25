@@ -12,6 +12,7 @@ class EmissionFactor(models.Model):
     plastic_waste = models.FloatField()
     sewage_treatment = models.FloatField()
     paper = models.FloatField()
+    ewaste=models.FloatField(default=0.0)
     refrigerant_gwp = models.FloatField()
 
     def __str__(self):
@@ -28,6 +29,8 @@ class EmissionData(models.Model):
     public_transport_emissions = models.FloatField(default=0.0)
     water_supply_emissions = models.FloatField(default=0.0)
     plastic_waste_emissions = models.FloatField(default=0.0)
+    paper_emissions = models.FloatField(default=0.0)
+    ewaste_emissions = models.FloatField(default=0.0)
 
     class Meta:
         unique_together = ('user', 'year')
