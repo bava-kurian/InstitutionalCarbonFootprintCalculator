@@ -278,6 +278,7 @@ form textarea::placeholder {
               {% if user.is_authenticated %}
               {% if user.institution %}
               <a href="{% url 'dashboard' %}" class="nav-link" >Dashboard</a>
+              <li><a href="{% url 'input_monthly_data' emi_data_id=emi_data_form.instance.id %}">Enter Monthly Data</a></li>
               {% else %}
                   <a href="{% url 'institution_register' %}" class="nav-link">Dashboard</a>
               {% endif %}
