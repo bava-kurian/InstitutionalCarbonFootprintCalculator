@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Monthly Data Summary for {{ year }}</h1>
+
+<!-- Add year selector -->
+<div class="year-selector">
+    <form method="get" action="{% url 'monthly_data_summary' %}">
+        <label for="year">Select Year:</label>
+        <select name="year" id="year" onchange="this.form.submit()">
+            {% for y in available_years %}
+                <option value="{{ y }}" {% if y|stringformat:"i" == year|stringformat:"i" %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+<div class="table-wrapper">
+    <table class="summary-table">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th colspan="3">Energy</th>
+                <th colspan="3">Fuel</th>
+                <th colspan="4">Transportation</th>
+                <th colspan="2">Water</th>
+                <th colspan="4">Waste</th>
+                <th>Paper</th>
+                <th>Actions</th>
+            </tr>
+            <tr>
+                <th></th>
+                <!-- Energy -->
+                <th>Electricity (kWh)</th>
+                <th>Solar (kWh)</th>
+                <th>Generator (L)</th>
+                <!-- Fuel -->
+                <th>Diesel (L)</th>
+                <th>Petrol (L)</th>
+                <th>LPG (kg)</th>
+                <!-- Transportation -->
+                <th>Bus (km)</th>
+                <th>Personal (km)</th>
+                <th>Public (km)</th>
+                <th>EV (km)</th>
+                <!-- Water -->
+                <th>Consumed (kL)</th>
+                <th>Treated (kL)</th>
+                <!-- Waste -->
+                <th>Organic (kg)</th>
+                <th>Plastic (kg)</th>
+                <th>Sewage (L)</th>
+                <th>E-Waste (kg)</th>
+                <!-- Paper -->
+                <th>Paper (kg)</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for month in monthly_data %}
+            <tr>
+                <td>{{ month.month_name }}</td>
+                <!-- Energy -->
+                <td>{{ month.data.electricity_kwh|default:'-' }}</td>
+                <td>{{ month.data.solar_generation_kwh|default:'-' }}</td>
+                <td>{{ month.data.generator_fuel_liters|default:'-' }}</td>
+                <!-- Fuel -->
+                <td>{{ month.data.diesel_liters|default:'-' }}</td>
+                <td>{{ month.data.petrol_liters|default:'-' }}</td>
+                <td>{{ month.data.lpg_kg|default:'-' }}</td>
+                <!-- Transportation -->
+                <td>{{ month.data.distance_by_bus_km|default:'-' }}</td>
+                <td>{{ month.data.distance_by_personal_km|default:'-' }}</td>
+                <td>{{ month.data.distance_by_public_km|default:'-' }}</td>
+                <td>{{ month.data.distance_by_ev_km|default:'-' }}</td>
+                <!-- Water -->
+                <td>{{ month.data.water_consumed_kl|default:'-' }}</td>
+                <td>{{ month.data.wastewater_treated_kl|default:'-' }}</td>
+                <!-- Waste -->
+                <td>{{ month.data.organic_waste_kg|default:'-' }}</td>
+                <td>{{ month.data.plastic_waste_kg|default:'-' }}</td>
+                <td>{{ month.data.sewage_liters|default:'-' }}</td>
+                <td>{{ month.data.ewaste_kg|default:'-' }}</td>
+                <!-- Paper -->
+                <td>{{ month.data.paper_kg|default:'-' }}</td>
+                <td class="actions-cell">
+                    {% if month.data %}
+                        <a href="{% url 'monthly_data_entry' %}?year={{ year }}&month={{ month.month_num }}" class="edit-button">Edit</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            <tr class="totals">
+                <td><strong>Totals</strong></td>
+                <!-- Energy -->
+                <td>{{ totals.total_electricity|default:'0' }}</td>
+                <td>{{ totals.total_solar|default:'0' }}</td>
+                <td>{{ totals.total_generator|default:'0' }}</td>
+                <!-- Fuel -->
+                <td>{{ totals.total_diesel|default:'0' }}</td>
+                <td>{{ totals.total_petrol|default:'0' }}</td>
+                <td>{{ totals.total_lpg|default:'0' }}</td>
+                <!-- Transportation -->
+                <td>{{ totals.total_bus|default:'0' }}</td>
+                <td>{{ totals.total_personal|default:'0' }}</td>
+                <td>{{ totals.total_public|default:'0' }}</td>
+                <td>{{ totals.total_ev|default:'0' }}</td>
+                <!-- Water -->
+                <td>{{ totals.total_water|default:'0' }}</td>
+                <td>{{ totals.total_wastewater|default:'0' }}</td>
+                <!-- Waste -->
+                <td>{{ totals.total_organic|default:'0' }}</td>
+                <td>{{ totals.total_plastic|default:'0' }}</td>
+                <td>{{ totals.total_sewage|default:'0' }}</td>
+                <td>{{ totals.total_ewaste|default:'0' }}</td>
+                <!-- Paper -->
+                <td>{{ totals.total_paper|default:'0' }}</td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="actions">
+    {% if months_complete %}
+        <form method="post" style="display: inline;">
+            {% csrf_token %}
+            <input type="hidden" name="transfer_to_input" value="1">
+            <button type="submit" class="cta-button">Transfer to Input Form</button>
+        </form>
+    {% else %}
+    <form method="post" style="display: inline;">
+        {% csrf_token %}
+        <input type="hidden" name="transfer_to_input" value="1">
+        <button type="submit" class="cta-button" disabled>Transfer to Input Form</button>
+
+    {% endif %}
+</form>
+<a href="{% url 'monthly_data_entry' %}?year={{ year }}&next_month={{ next_month }}&prefill=true" 
+   class="cta-button">
+    Continue Entering Data for {{ next_month|stringformat:"02d" }}/{{ year }}
+</a>
+</div>
+
+<style>
+    .year-selector {
+        margin: 20px 0;
+    }
+    .year-selector select {
+        padding: 5px;
+        margin-left: 10px;
+    }
+    .table-wrapper {
+        overflow-x: auto;
+        margin: 20px 0;
+    }
+    .summary-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+    .summary-table th, .summary-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: right;
+    }
+    .summary-table th {
+        background-color: #f5f5f5;
+        font-weight: 600;
+    }
+    .totals {
+        background-color: #e8f5e9;
+        font-weight: 500;
+    }
+    .cta-button {
+        margin-top: 20px;
+    }
+    .actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+    .actions-cell {
+        text-align: center !important;
+    }
+    .edit-button {
+        padding: 2px 8px;
+        background-color: #4a5568;
+        color: white;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 12px;
+    }
+    .edit-button:hover {
+        background-color: #2d3748;
+    }
+</style>
+{% endblock %}

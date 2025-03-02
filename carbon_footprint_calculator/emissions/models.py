@@ -90,3 +90,48 @@ class PaperUsage(models.Model):
 
     def __str__(self):
         return f"Paper Usage for {self.emi_data.year}"
+
+class MonthlyEmissionData(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    year = models.IntegerField()
+    month = models.IntegerField()
+    is_complete = models.BooleanField(default=False)
+    
+    # Energy
+    electricity_kwh = models.FloatField(null=True, blank=True, default=None)
+    solar_generation_kwh = models.FloatField(null=True, blank=True, default=None)
+    generator_fuel_liters = models.FloatField(null=True, blank=True, default=None)
+    
+    # Fuel
+    diesel_liters = models.FloatField(null=True, blank=True, default=None)
+    petrol_liters = models.FloatField(null=True, blank=True, default=None)
+    lpg_kg = models.FloatField(null=True, blank=True, default=None)
+    
+    # Transportation
+    distance_by_bus_km = models.FloatField(null=True, blank=True, default=None)
+    distance_by_personal_km = models.FloatField(null=True, blank=True, default=None)
+    distance_by_public_km = models.FloatField(null=True, blank=True, default=None)
+    distance_by_ev_km = models.FloatField(null=True, blank=True, default=None)
+    
+    # Water
+    water_consumed_kl = models.FloatField(null=True, blank=True, default=None)
+    wastewater_treated_kl = models.FloatField(null=True, blank=True, default=None)
+    
+    # Waste
+    organic_waste_kg = models.FloatField(null=True, blank=True, default=None)
+    plastic_waste_kg = models.FloatField(null=True, blank=True, default=None)
+    sewage_liters = models.FloatField(null=True, blank=True, default=None)
+    ewaste_kg = models.FloatField(null=True, blank=True, default=None)
+    
+    # Paper
+    paper_kg = models.FloatField(null=True, blank=True, default=None)
+
+    class Meta:
+        unique_together = ('user', 'year', 'month')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user'],
+                condition=models.Q(year__lt=models.F('year')),
+                name='one_year_per_user'
+            )
+        ]

@@ -7,116 +7,217 @@ from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from datetime import datetime
+from django.db.models import Sum
+from .models import MonthlyEmissionData
+from urllib.parse import urlencode
 
 @login_required
 def input_data(request):
-    year = request.GET.get('year')
-    if year:
-        emission_data = get_object_or_404(EmissionData, user=request.user, year=year)
-        energy = get_object_or_404(EnergyConsumption, emi_data=emission_data)
-        fuel = get_object_or_404(FuelConsumption, emi_data=emission_data)
-        transport = get_object_or_404(Transportation, emi_data=emission_data)
-        water = get_object_or_404(WaterUsage, emi_data=emission_data)
-        waste = get_object_or_404(WasteManagement, emi_data=emission_data)
-        paper = get_object_or_404(PaperUsage, emi_data=emission_data)
-    else:
-        emission_data = None
-        energy = None
-        fuel = None
-        transport = None
-        water = None
-        waste = None
-        paper = None
-
     if request.method == 'POST':
-        if 'csv_file' in request.FILES:
-            csv_file = request.FILES['csv_file']
-            if not csv_file.name.endswith('.csv'):
-                return HttpResponse("Please upload a valid CSV file.")
-            
-            decoded_file = csv_file.read().decode('utf-8').splitlines()
-            reader = csv.DictReader(decoded_file)
-            for row in reader:
-                if row['year'] == year:
-                    emi_data_form = EmissionDataForm({
-                        'year': row['year'],
-                        'user': request.user.id
-                    }, instance=emission_data)
-                    energy_form = EnergyConsumptionForm({
-                        'electricity_kwh': row['electricity_kwh'],
-                        'solar_generation_kwh': row['solar_generation_kwh'],
-                        'generator_fuel_liters': row['generator_fuel_liters']
-                    }, instance=energy)
-                    fuel_form = FuelConsumptionForm({
-                        'diesel_liters': row['diesel_liters'],
-                        'petrol_liters': row['petrol_liters'],
-                        'lpg_kg': row['lpg_kg']
-                    }, instance=fuel)
-                    transport_form = TransportationForm({
-                        'distance_by_bus_km': row['distance_by_bus_km'],
-                        'distance_by_personal_km': row['distance_by_personal_km'],
-                        'distance_by_public_km': row['distance_by_public_km'],
-                        'distance_by_ev_km': row['distance_by_ev_km']
-                    }, instance=transport)
-                    water_form = WaterUsageForm({
-                        'water_consumed_kl': row['water_consumed_kl'],
-                        'wastewater_treated_kl': row['wastewater_treated_kl']
-                    }, instance=water)
-                    waste_form = WasteManagementForm({
-                        'organic_waste_kg': row['organic_waste_kg'],
-                        'plastic_waste_kg': row['plastic_waste_kg'],
-                        'sewage_liters': row['sewage_liters'],
-                        'ewaste_kg': row['ewaste_kg']
-                    }, instance=waste)
-                    paper_form = PaperUsageForm({
-                        'paper_kg': row['paper_kg']
-                    }, instance=paper)
-                    break
-        else:
-            emi_data_form = EmissionDataForm(request.POST, instance=emission_data)
-            energy_form = EnergyConsumptionForm(request.POST, instance=energy)
-            fuel_form = FuelConsumptionForm(request.POST, instance=fuel)
-            transport_form = TransportationForm(request.POST, instance=transport)
-            water_form = WaterUsageForm(request.POST, instance=water)
-            waste_form = WasteManagementForm(request.POST, instance=waste)
-            paper_form = PaperUsageForm(request.POST, instance=paper)
+        # Create a new EmissionData instance for the submitted data
+        emi_data_form = EmissionDataForm(request.POST)
+        energy_form = EnergyConsumptionForm(request.POST)
+        fuel_form = FuelConsumptionForm(request.POST)
+        transport_form = TransportationForm(request.POST)
+        water_form = WaterUsageForm(request.POST)
+        waste_form = WasteManagementForm(request.POST)
+        paper_form = PaperUsageForm(request.POST)
 
         if (emi_data_form.is_valid() and energy_form.is_valid() and fuel_form.is_valid() and
             transport_form.is_valid() and water_form.is_valid() and waste_form.is_valid() and paper_form.is_valid()):
             
             emission_data = emi_data_form.save(commit=False)
             emission_data.user = request.user
-            if EmissionData.objects.filter(user=request.user, year=emission_data.year).exclude(pk=emission_data.pk).exists():
-                emi_data_form.add_error('year', 'You have already entered data for this year.')
-            else:
-                emission_data.save()
-                energy = energy_form.save(commit=False)
-                energy.emi_data = emission_data
-                energy.save()
-                fuel = fuel_form.save(commit=False)
-                fuel.emi_data = emission_data
-                fuel.save()
-                transport = transport_form.save(commit=False)
-                transport.emi_data = emission_data
-                transport.save()
-                water = water_form.save(commit=False)
-                water.emi_data = emission_data
-                water.save()
-                waste = waste_form.save(commit=False)
-                waste.emi_data = emission_data
-                waste.save()
-                paper = paper_form.save(commit=False)
-                paper.emi_data = emission_data
-                paper.save()
-                return redirect('results', emission_data.id)
+            emission_data.save()
+
+            energy = energy_form.save(commit=False)
+            energy.emi_data = emission_data
+            energy.save()
+
+            fuel = fuel_form.save(commit=False)
+            fuel.emi_data = emission_data
+            fuel.save()
+
+            transport = transport_form.save(commit=False)
+            transport.emi_data = emission_data
+            transport.save()
+
+            water = water_form.save(commit=False)
+            water.emi_data = emission_data
+            water.save()
+
+            waste = waste_form.save(commit=False)
+            waste.emi_data = emission_data
+            waste.save()
+
+            paper = paper_form.save(commit=False)
+            paper.emi_data = emission_data
+            paper.save()
+
+            return redirect('results', emission_data.id)
     else:
-        emi_data_form = EmissionDataForm(instance=emission_data)
-        energy_form = EnergyConsumptionForm(instance=energy)
-        fuel_form = FuelConsumptionForm(instance=fuel)
-        transport_form = TransportationForm(instance=transport)
-        water_form = WaterUsageForm(instance=water)
-        waste_form = WasteManagementForm(instance=waste)
-        paper_form = PaperUsageForm(instance=paper)
+        year = request.GET.get('year')
+        
+        # Check if we have prefilled data from monthly summary
+        prefilled_data = {
+            'year': year,
+            'electricity_kwh': request.GET.get('electricity_kwh'),
+            'solar_generation_kwh': request.GET.get('solar_generation_kwh'),
+            'generator_fuel_liters': request.GET.get('generator_fuel_liters'),
+            'diesel_liters': request.GET.get('diesel_liters'),
+            'petrol_liters': request.GET.get('petrol_liters'),
+            'lpg_kg': request.GET.get('lpg_kg'),
+            'distance_by_bus_km': request.GET.get('distance_by_bus_km'),
+            'distance_by_personal_km': request.GET.get('distance_by_personal_km'),
+            'distance_by_public_km': request.GET.get('distance_by_public_km'),
+            'distance_by_ev_km': request.GET.get('distance_by_ev_km'),
+            'water_consumed_kl': request.GET.get('water_consumed_kl'),
+            'wastewater_treated_kl': request.GET.get('wastewater_treated_kl'),
+            'organic_waste_kg': request.GET.get('organic_waste_kg'),
+            'plastic_waste_kg': request.GET.get('plastic_waste_kg'),
+            'sewage_liters': request.GET.get('sewage_liters'),
+            'ewaste_kg': request.GET.get('ewaste_kg'),
+            'paper_kg': request.GET.get('paper_kg')
+        }
+        
+        if year and all(v is not None for v in prefilled_data.values()):
+            emi_data_form = EmissionDataForm(initial={'year': year})
+            energy_form = EnergyConsumptionForm(initial={
+                'electricity_kwh': prefilled_data['electricity_kwh'],
+                'solar_generation_kwh': prefilled_data['solar_generation_kwh'],
+                'generator_fuel_liters': prefilled_data['generator_fuel_liters']
+            })
+            fuel_form = FuelConsumptionForm(initial={
+                'diesel_liters': prefilled_data['diesel_liters'],
+                'petrol_liters': prefilled_data['petrol_liters'],
+                'lpg_kg': prefilled_data['lpg_kg']
+            })
+            transport_form = TransportationForm(initial={
+                'distance_by_bus_km': prefilled_data['distance_by_bus_km'],
+                'distance_by_personal_km': prefilled_data['distance_by_personal_km'],
+                'distance_by_public_km': prefilled_data['distance_by_public_km'],
+                'distance_by_ev_km': prefilled_data['distance_by_ev_km']
+            })
+            water_form = WaterUsageForm(initial={
+                'water_consumed_kl': prefilled_data['water_consumed_kl'],
+                'wastewater_treated_kl': prefilled_data['wastewater_treated_kl']
+            })
+            waste_form = WasteManagementForm(initial={
+                'organic_waste_kg': prefilled_data['organic_waste_kg'],
+                'plastic_waste_kg': prefilled_data['plastic_waste_kg'],
+                'sewage_liters': prefilled_data['sewage_liters'],
+                'ewaste_kg': prefilled_data['ewaste_kg']
+            })
+            paper_form = PaperUsageForm(initial={
+                'paper_kg': prefilled_data['paper_kg']
+            })
+        else:
+            if year:
+                emission_data = get_object_or_404(EmissionData, user=request.user, year=year)
+                energy = get_object_or_404(EnergyConsumption, emi_data=emission_data)
+                fuel = get_object_or_404(FuelConsumption, emi_data=emission_data)
+                transport = get_object_or_404(Transportation, emi_data=emission_data)
+                water = get_object_or_404(WaterUsage, emi_data=emission_data)
+                waste = get_object_or_404(WasteManagement, emi_data=emission_data)
+                paper = get_object_or_404(PaperUsage, emi_data=emission_data)
+            else:
+                emission_data = None
+                energy = None
+                fuel = None
+                transport = None
+                water = None
+                waste = None
+                paper = None
+
+            if request.method == 'POST':
+                if 'csv_file' in request.FILES:
+                    csv_file = request.FILES['csv_file']
+                    if not csv_file.name.endswith('.csv'):
+                        return HttpResponse("Please upload a valid CSV file.")
+                    
+                    decoded_file = csv_file.read().decode('utf-8').splitlines()
+                    reader = csv.DictReader(decoded_file)
+                    for row in reader:
+                        if row['year'] == year:
+                            emi_data_form = EmissionDataForm({
+                                'year': row['year'],
+                                'user': request.user.id
+                            }, instance=emission_data)
+                            energy_form = EnergyConsumptionForm({
+                                'electricity_kwh': row['electricity_kwh'],
+                                'solar_generation_kwh': row['solar_generation_kwh'],
+                                'generator_fuel_liters': row['generator_fuel_liters']
+                            }, instance=energy)
+                            fuel_form = FuelConsumptionForm({
+                                'diesel_liters': row['diesel_liters'],
+                                'petrol_liters': row['petrol_liters'],
+                                'lpg_kg': row['lpg_kg']
+                            }, instance=fuel)
+                            transport_form = TransportationForm({
+                                'distance_by_bus_km': row['distance_by_bus_km'],
+                                'distance_by_personal_km': row['distance_by_personal_km'],
+                                'distance_by_public_km': row['distance_by_public_km'],
+                                'distance_by_ev_km': row['distance_by_ev_km']
+                            }, instance=transport)
+                            water_form = WaterUsageForm({
+                                'water_consumed_kl': row['water_consumed_kl'],
+                                'wastewater_treated_kl': row['wastewater_treated_kl']
+                            }, instance=water)
+                            waste_form = WasteManagementForm({
+                                'organic_waste_kg': row['organic_waste_kg'],
+                                'plastic_waste_kg': row['plastic_waste_kg'],
+                                'sewage_liters': row['sewage_liters'],
+                                'ewaste_kg': row['ewaste_kg']
+                            }, instance=waste)
+                            paper_form = PaperUsageForm({
+                                'paper_kg': row['paper_kg']
+                            }, instance=paper)
+                            break
+                else:
+                    emi_data_form = EmissionDataForm(request.POST, instance=emission_data)
+                    energy_form = EnergyConsumptionForm(request.POST, instance=energy)
+                    fuel_form = FuelConsumptionForm(request.POST, instance=fuel)
+                    transport_form = TransportationForm(request.POST, instance=transport)
+                    water_form = WaterUsageForm(request.POST, instance=water)
+                    waste_form = WasteManagementForm(request.POST, instance=waste)
+                    paper_form = PaperUsageForm(request.POST, instance=paper)
+
+                if (emi_data_form.is_valid() and energy_form.is_valid() and fuel_form.is_valid() and
+                    transport_form.is_valid() and water_form.is_valid() and waste_form.is_valid() and paper_form.is_valid()):
+                    
+                    emission_data = emi_data_form.save(commit=False)
+                    emission_data.user = request.user
+                    if EmissionData.objects.filter(user=request.user, year=emission_data.year).exclude(pk=emission_data.pk).exists():
+                        emi_data_form.add_error('year', 'You have already entered data for this year.')
+                    else:
+                        emission_data.save()
+                        energy = energy_form.save(commit=False)
+                        energy.emi_data = emission_data
+                        energy.save()
+                        fuel = fuel_form.save(commit=False)
+                        fuel.emi_data = emission_data
+                        fuel.save()
+                        transport = transport_form.save(commit=False)
+                        transport.emi_data = emission_data
+                        transport.save()
+                        water = water_form.save(commit=False)
+                        water.emi_data = emission_data
+                        water.save()
+                        waste = waste_form.save(commit=False)
+                        waste.emi_data = emission_data
+                        waste.save()
+                        paper = paper_form.save(commit=False)
+                        paper.emi_data = emission_data
+                        paper.save()
+                        return redirect('results', emission_data.id)
+            else:
+                emi_data_form = EmissionDataForm(instance=emission_data)
+                energy_form = EnergyConsumptionForm(instance=energy)
+                fuel_form = FuelConsumptionForm(instance=fuel)
+                transport_form = TransportationForm(instance=transport)
+                water_form = WaterUsageForm(instance=water)
+                waste_form = WasteManagementForm(instance=waste)
+                paper_form = PaperUsageForm(instance=paper)
 
     return render(request, 'emissions/input_form.html', {
         'emi_data_form': emi_data_form,
@@ -303,3 +404,259 @@ def emission_detail(request, emi_data_id):
         'paper': paper,
     }
     return render(request, 'emissions/emission_detail.html', context)
+
+@login_required
+def monthly_data_entry(request):
+    current_year = datetime.now().year
+    next_month = None
+    
+    # Check if user already has data for a different year
+    existing_data_other_year = MonthlyEmissionData.objects.filter(
+        user=request.user
+    ).exclude(year=current_year).exists()
+    
+    if existing_data_other_year:
+        return render(request, 'emissions/error.html', {
+            'message': 'You already have emission data for another year. Only one year of data entry is allowed.'
+        })
+
+    if request.method == 'POST':
+        year = int(request.POST.get('year'))
+        if year != current_year:
+            return render(request, 'emissions/error.html', {
+                'message': f'Data entry is only allowed for the current year ({current_year})'
+            })
+        
+        # Get or create the monthly data entry
+        monthly_data, created = MonthlyEmissionData.objects.get_or_create(
+            user=request.user,
+            year=int(year),
+            month=int(request.POST.get('month'))
+        )
+        
+        # List all the fields we want to update
+        fields = [
+            'electricity_kwh', 'solar_generation_kwh', 'generator_fuel_liters',
+            'diesel_liters', 'petrol_liters', 'lpg_kg',
+            'distance_by_bus_km', 'distance_by_personal_km', 'distance_by_public_km', 'distance_by_ev_km',
+            'water_consumed_kl', 'wastewater_treated_kl',
+            'organic_waste_kg', 'plastic_waste_kg', 'sewage_liters', 'ewaste_kg',
+            'paper_kg'
+        ]
+        
+        print("\nReceived values:")
+        # Update each field and print values
+        for field in fields:
+            value = request.POST.get(field, '')
+            print(f"{field}: {value}")
+            if value == '':
+                setattr(monthly_data, field, None)
+            else:
+                try:
+                    float_value = float(value)
+                    setattr(monthly_data, field, float_value)
+                    print(f"Converted {field} to {float_value}")
+                except ValueError:
+                    print(f"Error converting {field}")
+                    setattr(monthly_data, field, None)
+        
+        # Mark as complete if all fields have values
+        monthly_data.is_complete = all(
+            getattr(monthly_data, field) is not None 
+            for field in fields
+        )
+        
+        # Save and print final values
+        monthly_data.save()
+        print("\nSaved values in database:")
+        for field in fields:
+            print(f"{field}: {getattr(monthly_data, field)}")
+        print(f"Record ID: {monthly_data.id}\n")
+        
+        return redirect('monthly_data_summary')
+    
+    # Get next empty month if we're continuing data entry
+    if request.GET.get('next_month'):
+        next_month = int(request.GET.get('next_month'))
+    
+    # Pre-fill form with existing data if available
+    existing_data = None
+    if request.GET.get('year') and request.GET.get('month'):
+        year = int(request.GET.get('year'))
+        month = int(request.GET.get('month'))
+        
+        if year != current_year:
+            return render(request, 'emissions/error.html', {
+                'message': f'Data entry is only allowed for the current year ({current_year})'
+            })
+        
+        # Try to get existing data for this month
+        existing_data = MonthlyEmissionData.objects.filter(
+            user=request.user,
+            year=year,
+            month=month
+        ).first()
+        
+        # If no existing data and prefill is requested, get last entered month's data
+        if not existing_data and request.GET.get('prefill') == 'true':
+            last_entry = MonthlyEmissionData.objects.filter(
+                user=request.user,
+                year=year,
+                month__lt=month
+            ).order_by('-month').first()
+            
+            if last_entry:
+                existing_data = last_entry
+                existing_data.pk = None  # Clear PK to treat as new entry
+                existing_data.month = month  # Set correct month
+    
+    context = {
+        'months': [
+            (1, 'January'), (2, 'February'), (3, 'March'),
+            (4, 'April'), (5, 'May'), (6, 'June'),
+            (7, 'July'), (8, 'August'), (9, 'September'),
+            (10, 'October'), (11, 'November'), (12, 'December')
+        ],
+        'years': [current_year],
+        'existing_data': existing_data,
+        'current_year': current_year,
+        'is_prefilled': request.GET.get('prefill') == 'true',
+        'next_month': next_month,
+        'selected_month': next_month or (existing_data.month if existing_data else None)
+    }
+    return render(request, 'emissions/monthly_data_entry.html', context)
+
+@login_required
+def monthly_data_summary(request):
+    year = request.GET.get('year', datetime.now().year)
+    
+    if request.method == 'POST' and request.POST.get('transfer_to_input') == '1':
+        # Get all monthly data for the year
+        monthly_data = MonthlyEmissionData.objects.filter(
+            user=request.user,
+            year=int(year)
+        )
+        
+        # Calculate yearly totals
+        yearly_totals = monthly_data.aggregate(
+            electricity_kwh=Sum('electricity_kwh'),
+            solar_generation_kwh=Sum('solar_generation_kwh'),
+            generator_fuel_liters=Sum('generator_fuel_liters'),
+            diesel_liters=Sum('diesel_liters'),
+            petrol_liters=Sum('petrol_liters'),
+            lpg_kg=Sum('lpg_kg'),
+            distance_by_bus_km=Sum('distance_by_bus_km'),
+            distance_by_personal_km=Sum('distance_by_personal_km'),
+            distance_by_public_km=Sum('distance_by_public_km'),
+            distance_by_ev_km=Sum('distance_by_ev_km'),
+            water_consumed_kl=Sum('water_consumed_kl'),
+            wastewater_treated_kl=Sum('wastewater_treated_kl'),
+            organic_waste_kg=Sum('organic_waste_kg'),
+            plastic_waste_kg=Sum('plastic_waste_kg'),
+            sewage_liters=Sum('sewage_liters'),
+            ewaste_kg=Sum('ewaste_kg'),
+            paper_kg=Sum('paper_kg')
+        )
+        
+        # Redirect to input form with calculated totals
+        params = {
+            'year': year,
+            **{k: v for k, v in yearly_totals.items() if v is not None}
+        }
+        return redirect(f'/emissions/input/?{urlencode(params)}')
+    
+    # Create a list of all months
+    all_months = range(1, 13)
+    months_data = {month: None for month in all_months}
+    
+    # Get existing data
+    monthly_data = MonthlyEmissionData.objects.filter(
+        user=request.user,
+        year=int(year)
+    ).order_by('month')
+    
+    # Fill in existing data
+    for data in monthly_data:
+        months_data[data.month] = data
+    
+    # Check if at least one month has all fields filled
+    any_month_complete = False
+    for data in monthly_data:
+        fields_to_check = [
+            'electricity_kwh', 'solar_generation_kwh', 'generator_fuel_liters',
+            'diesel_liters', 'petrol_liters', 'lpg_kg',
+            'distance_by_bus_km', 'distance_by_personal_km', 'distance_by_public_km', 'distance_by_ev_km',
+            'water_consumed_kl', 'wastewater_treated_kl',
+            'organic_waste_kg', 'plastic_waste_kg', 'sewage_liters', 'ewaste_kg',
+            'paper_kg'
+        ]
+        if all(getattr(data, field) is not None for field in fields_to_check):
+            any_month_complete = True
+            break
+    
+    # Calculate totals only from existing data
+    totals = monthly_data.aggregate(
+        total_electricity=Sum('electricity_kwh'),
+        total_solar=Sum('solar_generation_kwh'),
+        total_generator=Sum('generator_fuel_liters'),
+        total_diesel=Sum('diesel_liters'),
+        total_petrol=Sum('petrol_liters'),
+        total_lpg=Sum('lpg_kg'),
+        total_bus=Sum('distance_by_bus_km'),
+        total_personal=Sum('distance_by_personal_km'),
+        total_public=Sum('distance_by_public_km'),
+        total_ev=Sum('distance_by_ev_km'),
+        total_water=Sum('water_consumed_kl'),
+        total_wastewater=Sum('wastewater_treated_kl'),
+        total_organic=Sum('organic_waste_kg'),
+        total_plastic=Sum('plastic_waste_kg'),
+        total_sewage=Sum('sewage_liters'),
+        total_ewaste=Sum('ewaste_kg'),
+        total_paper=Sum('paper_kg')
+    )
+    
+    # Get all available years
+    available_years = MonthlyEmissionData.objects.filter(
+        user=request.user
+    ).values_list('year', flat=True).distinct().order_by('year')
+    
+    # Create month labels
+    month_labels = [
+        (1, 'January'), (2, 'February'), (3, 'March'),
+        (4, 'April'), (5, 'May'), (6, 'June'),
+        (7, 'July'), (8, 'August'), (9, 'September'),
+        (10, 'October'), (11, 'November'), (12, 'December')
+    ]
+    
+    # Find next empty month
+    next_month = None
+    for month in all_months:
+        if month not in [d.month for d in monthly_data]:
+            next_month = month
+            break
+    
+    # Check if all totals are non-empty
+    all_totals_present = all(
+        value is not None and value != 0 
+        for value in totals.values()
+    )
+    
+    months_complete = monthly_data.count() == 12 and all_totals_present
+    
+    context = {
+        'monthly_data': [
+            {
+                'month_num': month,
+                'month_name': dict(month_labels)[month],
+                'data': months_data[month]
+            } 
+            for month in all_months
+        ],
+        'totals': totals,
+        'months_complete': any_month_complete,  # Changed condition
+        'year': year,
+        'available_years': available_years,
+        'next_month': next_month,
+    }
+    
+    return render(request, 'emissions/monthly_data_summary.html', context)

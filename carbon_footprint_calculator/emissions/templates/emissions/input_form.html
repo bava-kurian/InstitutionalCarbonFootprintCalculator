@@ -14,7 +14,7 @@
     }
 </style>
 <h1>Input Emissions Data</h1>
-<form method="post" enctype="multipart/form-data" class="text-center border p-4 rounded">
+<form method="post" class="input-form">
     {% csrf_token %}
     <h2>General Information</h2>
     {{ emi_data_form.as_p }}
@@ -35,7 +35,9 @@
     <br><br>
     <button type="button" onclick="downloadSampleCSV()">Download Sample CSV</button>
     <br><br>
-    <button type="submit" class="cta-button">Submit</button>
+    <div class="form-actions">
+        <button type="submit" class="cta-button">Save Yearly Data</button>
+    </div>
 </form>
 
 <script>

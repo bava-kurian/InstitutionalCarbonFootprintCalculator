@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Monthly Data Entry</h1>
+
+<form method="post" class="monthly-form">
+    {% csrf_token %}
+    
+    <div class="form-group">
+        <label for="year">Year:</label>
+        <select name="year" id="year" required>
+            {% for year in years %}
+                <option value="{{ year }}" {% if existing_data and existing_data.year == year %}selected{% endif %}>{{ year }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="month">Month:</label>
+        <select name="month" id="month" required>
+            {% for month_num, month_name in months %}
+                <option value="{{ month_num }}" 
+                    {% if next_month == month_num %}selected
+                    {% elif existing_data and existing_data.month == month_num %}selected{% endif %}>
+                    {{ month_name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <h2>Energy Consumption</h2>
+    <div class="form-group">
+        <label>Electricity (kWh):</label>
+        <input type="number" name="electricity_kwh" step="0.01" value="{{ existing_data.electricity_kwh|default:'' }}">
+    </div>
+    <div class="form-group">
+        <label>Solar Generation (kWh):</label>
+        <input type="number" name="solar_generation_kwh" step="0.01" value="{{ existing_data.solar_generation_kwh|default:'' }}">
+    </div>
+    <div class="form-group">
+        <label>Generator Fuel (Liters):</label>
+        <input type="number" name="generator_fuel_liters" step="0.01" value="{{ existing_data.generator_fuel_liters|default:'' }}">
+    </div>
+
+    <h2>Fuel Consumption</h2>
+    <div class="form-group">
+        <label>Diesel (Liters):</label>
+        <input type="number" name="diesel_liters" step="0.01" value="{{ existing_data.diesel_liters|default:'' }}">
+    </div>
+    <div class="form-group">
+        <label>Petrol (Liters):</label>
+        <input type="number" name="petrol_liters" step="0.01" value="{{ existing_data.petrol_liters|default:'' }}">
+    </div>
+    <div class="form-group">
+        <label>LPG (kg):</label>
+        <input type="number" name="lpg_kg" step="0.01" value="{{ existing_data.lpg_kg|default:'' }}">
+    </div>
+
+    <h2>Transportation</h2>
+    <div class="form-group">
+        <label>Distance by Bus (km):</label>
+        <input type="number" name="distance_by_bus_km" step="0.01" value="{{ existing_data.distance_by_bus_km|default:'' }}">
+    </div>
+    <div class="form-group">
+        <label>Distance by Personal Vehicle (km):</label>
+        <input type="number" name="distance_by_personal_km" step="0.01" value="{{ existing_data.distance_by_personal_km|default:'' }}">
+    </div>
+    <div class="form-group">
+        <label>Distance by Public Transport (km):</label>
+        <input type="number" name="distance_by_public_km" step="0.01" value="{{ existing_data.distance_by_public_km|default:'' }}">
+    </div>
+    <div class="form-group">
+        <label>Distance by Electric Vehicle (km):</label>
+        <input type="number" name="distance_by_ev_km" step="0.01" value="{{ existing_data.distance_by_ev_km|default:'' }}">
+    </div>
+
+    <h2>Water Usage</h2>
+    <div class="form-group">
+        <label>Water Consumed (kL):</label>
+        <input type="number" name="water_consumed_kl" step="0.01" value="{{ existing_data.water_consumed_kl|default:'' }}">
+    </div>
+    <div class="form-group">
+        <label>Wastewater Treated (kL):</label>
+        <input type="number" name="wastewater_treated_kl" step="0.01" value="{{ existing_data.wastewater_treated_kl|default:'' }}">
+    </div>
+
+    <h2>Waste Management</h2>
+    <div class="form-group">
+        <label>Organic Waste (kg):</label>
+        <input type="number" name="organic_waste_kg" step="0.01" value="{{ existing_data.organic_waste_kg|default:'' }}">
+    </div>
+    <div class="form-group">
+        <label>Plastic Waste (kg):</label>
+        <input type="number" name="plastic_waste_kg" step="0.01" value="{{ existing_data.plastic_waste_kg|default:'' }}">
+    </div>
+    <div class="form-group">
+        <label>Sewage (Liters):</label>
+        <input type="number" name="sewage_liters" step="0.01" value="{{ existing_data.sewage_liters|default:'' }}">
+    </div>
+    <div class="form-group">
+        <label>E-Waste (kg):</label>
+        <input type="number" name="ewaste_kg" step="0.01" value="{{ existing_data.ewaste_kg|default:'' }}">
+    </div>
+
+    <h2>Paper Usage</h2>
+    <div class="form-group">
+        <label>Paper (kg):</label>
+        <input type="number" name="paper_kg" step="0.01" value="{{ existing_data.paper_kg|default:'' }}">
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="cta-button">Save Monthly Data</button>
+        <a href="{% url 'monthly_data_summary' %}" class="cta-button secondary">View Summary</a>
+    </div>
+</form>
+
+<style>
+    .monthly-form {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    h2 {
+        margin-top: 30px;
+        margin-bottom: 20px;
+        color: #059669;
+    }
+    input[type="number"] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}

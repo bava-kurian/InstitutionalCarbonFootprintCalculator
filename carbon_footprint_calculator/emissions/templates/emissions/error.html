@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="error-container">
+    <h1>Error</h1>
+    <p class="error-message">{{ message }}</p>
+    <a href="{% url 'monthly_data_summary' %}" class="cta-button">Back to Summary</a>
+</div>
+
+<style>
+    .error-container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+        text-align: center;
+    }
+    .error-message {
+        color: #dc2626;
+        margin: 20px 0;
+        padding: 15px;
+        background-color: #fee2e2;
+        border: 1px solid #dc2626;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
