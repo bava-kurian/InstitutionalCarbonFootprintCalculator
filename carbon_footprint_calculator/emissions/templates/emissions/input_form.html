@@ -1,7 +1,5 @@
 {% extends 'base.html' %}
 
-{% load custom_tags %}
-
 {% block title %}Input Emissions Data{% endblock %}
 
 {% block content %}
@@ -21,13 +19,7 @@
     <h2>General Information</h2>
     {{ emi_data_form.as_p }}
     <h2>Energy Consumption</h2>
-    <label for="electricity_kwh">Electricity (kWh)</label>
-    <select name="electricity_kwh" id="electricity_kwh">
-        {% range_custom 1 13 as range %}
-        {% for i in range %}
-            <option value="{{ i }}">Month {{ i }}</option>
-        {% endfor %}
-    </select>
+    {{ energy_form.as_p }}
     <h2>Fuel Consumption</h2>
     {{ fuel_form.as_p }}
     <h2>Transportation</h2>
