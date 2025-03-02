@@ -92,9 +92,11 @@ def input_data(request):
                 emission_data.save()
                 energy = energy_form.save(commit=False)
                 energy.emi_data = emission_data
+                energy.electricity_kwh = sum([float(request.POST.get(f'electricity_kwh_{i}', 0)) for i in range(1, 13)])
                 energy.save()
                 fuel = fuel_form.save(commit=False)
                 fuel.emi_data = emission_data
+                fuel.diesel_liters = sum([float(request.POST.get(f'diesel_liters_{i}', 0)) for i in range(1, 13)])
                 fuel.save()
                 transport = transport_form.save(commit=False)
                 transport.emi_data = emission_data
@@ -155,9 +157,11 @@ def edit_data(request, emi_data_id):
             emission_data.save()
             energy = energy_form.save(commit=False)
             energy.emi_data = emission_data
+            energy.electricity_kwh = sum([float(request.POST.get(f'electricity_kwh_{i}', 0)) for i in range(1, 13)])
             energy.save()
             fuel = fuel_form.save(commit=False)
             fuel.emi_data = emission_data
+            fuel.diesel_liters = sum([float(request.POST.get(f'diesel_liters_{i}', 0)) for i in range(1, 13)])
             fuel.save()
             transport = transport_form.save(commit=False)
             transport.emi_data = emission_data

@@ -1,0 +1,6 @@
+INSTALLED_APPS = [
+    # ...existing apps...
+    'user',
+    'emissions',
+    # ...existing apps...
+]
