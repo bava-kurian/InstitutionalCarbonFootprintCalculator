@@ -281,7 +281,6 @@ form textarea::placeholder {
               {% else %}
                   <a href="{% url 'institution_register' %}" class="nav-link">Dashboard</a>
               {% endif %}
-                <a class="nav-link" href="{% url 'collect_data' %}">Data Collection</a>
                 <form method="post" action="{% url 'logout' %}" style="display: inline">
                   {% csrf_token %}
                   <button type="submit" class="cta-button">

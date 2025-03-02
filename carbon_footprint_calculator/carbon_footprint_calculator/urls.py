@@ -7,5 +7,4 @@ urlpatterns = [
     path('', home, name='home'),
     path('', include('user.urls')),
     path('emissions/', include('emissions.urls')),
-    path('datacollection/', include('datacollection.urls'))
 ]
