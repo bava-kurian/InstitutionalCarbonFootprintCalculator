@@ -1,5 +1,5 @@
 from django import forms
-from .models import EmissionData, EnergyConsumption, FuelConsumption, Transportation, WaterUsage, WasteManagement, PaperUsage
+from .models import EmissionData, EnergyConsumption, FuelConsumption, Transportation, WaterUsage, WasteManagement, PaperUsage,FoodConsumption,Refrigerants
 
 class EmissionDataForm(forms.ModelForm):
     class Meta:
@@ -35,3 +35,13 @@ class PaperUsageForm(forms.ModelForm):
     class Meta:
         model = PaperUsage
         fields = ['paper_kg']
+
+class FoodConsumptionForm(forms.ModelForm):
+    class Meta:
+        model = FoodConsumption
+        fields = ['red_meat_kg', 'poultry_kg', 'vegetables_kg']
+
+class RefrigerantsForm(forms.ModelForm):
+    class Meta:
+        model = Refrigerants
+        fields = ['r134a_kg', 'r410a_kg']

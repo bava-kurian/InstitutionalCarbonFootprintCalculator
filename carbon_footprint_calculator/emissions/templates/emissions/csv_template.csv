@@ -1,0 +1,2 @@
+year,electricity_kwh,solar_generation_kwh,generator_fuel_liters,diesel_liters,petrol_liters,lpg_kg,distance_by_bus_km,distance_by_personal_km,distance_by_public_km,distance_by_ev_km,water_consumed_kl,wastewater_treated_kl,organic_waste_kg,plastic_waste_kg,sewage_liters,ewaste_kg,paper_kg,red_meat_kg,poultry_kg,vegetables_kg,r134a_kg,r410a_kg
+2023,1000,200,50,300,400,100,500,600,700,800,900,1000,1100,1200,1300,1400,1500,100,200,300,10,15

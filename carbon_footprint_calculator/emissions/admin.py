@@ -1,5 +1,10 @@
 from django.contrib import admin
-from .models import EmissionFactor, EmissionData, EnergyConsumption, FuelConsumption, Transportation, WaterUsage, WasteManagement, PaperUsage, MonthlyEmissionData
+from .models import (
+    EmissionFactor, EmissionData, EnergyConsumption, 
+    FuelConsumption, Transportation, WaterUsage, 
+    WasteManagement, PaperUsage, MonthlyEmissionData,
+    FoodConsumption, Refrigerants
+)
 
 class EmissionDataAdmin(admin.ModelAdmin):
     list_display = ('user', 'year', 'total_emissions')
@@ -29,6 +34,12 @@ class MonthlyEmissionDataAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'year', 'month']
     ordering = ['-year', '-month']
 
+class FoodConsumptionAdmin(admin.ModelAdmin):
+    list_display = ('emi_data', 'red_meat_kg', 'poultry_kg', 'vegetables_kg')
+
+class RefrigerantsAdmin(admin.ModelAdmin):
+    list_display = ('emi_data', 'r134a_kg', 'r410a_kg')
+
 admin.site.register(EmissionFactor)
 admin.site.register(EmissionData, EmissionDataAdmin)
 admin.site.register(EnergyConsumption, EnergyConsumptionAdmin)
@@ -38,3 +49,5 @@ admin.site.register(WaterUsage, WaterUsageAdmin)
 admin.site.register(WasteManagement, WasteManagementAdmin)
 admin.site.register(PaperUsage, PaperUsageAdmin)
 admin.site.register(MonthlyEmissionData, MonthlyEmissionDataAdmin)
+admin.site.register(FoodConsumption, FoodConsumptionAdmin)
+admin.site.register(Refrigerants, RefrigerantsAdmin)

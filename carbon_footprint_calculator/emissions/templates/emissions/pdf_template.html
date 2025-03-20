@@ -1,21 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Emission Report</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        h1 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        table, th, td { border: 1px solid black; }
-        th, td { padding: 10px; text-align: left; }
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
     </style>
 </head>
+
 <body>
     <h1>Emission Report for Year: {{ emission_data.year }}</h1>
     <p>Total Emissions: {{ total_emissions }} kg CO2e</p>
     <h2>Breakdown</h2>
-    
+
     <h3>Scope 1: Direct Emissions</h3>
     <table>
         <tr>
@@ -34,8 +56,16 @@
             <td>LPG</td>
             <td>{{ lpg_emissions }}</td>
         </tr>
+        <tr>
+            <td>R134a Refrigerant</td>
+            <td>{{ r134a_emissions }}</td>
+        </tr>
+        <tr>
+            <td>R410a Refrigerant</td>
+            <td>{{ r410a_emissions }}</td>
+        </tr>
     </table>
-    
+
     <h3>Scope 2: Indirect Emissions</h3>
     <table>
         <tr>
@@ -47,7 +77,7 @@
             <td>{{ electricity_emissions }}</td>
         </tr>
     </table>
-    
+
     <h3>Scope 3: Other Indirect Emissions</h3>
     <table>
         <tr>
@@ -70,6 +100,44 @@
             <td>E-Waste</td>
             <td>{{ ewaste_emissions }}</td>
         </tr>
+        <tr>
+            <td>Red Meat</td>
+            <td>{{ red_meat_emissions }}</td>
+        </tr>
+        <tr>
+            <td>Poultry</td>
+            <td>{{ poultry_emissions }}</td>
+        </tr>
+        <tr>
+            <td>Vegetables</td>
+            <td>{{ vegetables_emissions }}</td>
+        </tr>
+    </table>
+
+    <h3>Emissions Summary by Scope</h3>
+    <table>
+        <tr>
+            <th>Scope</th>
+            <th>Total Emissions (kg CO2e)</th>
+        </tr>
+        <tr>
+            <td>Scope 1 (Direct)</td>
+            <td>{{ diesel_emissions|add:petrol_emissions|add:lpg_emissions|add:r134a_emissions|add:r410a_emissions }}
+            </td>
+        </tr>
+        <tr>
+            <td>Scope 2 (Indirect)</td>
+            <td>{{ electricity_emissions }}</td>
+        </tr>
+        <tr>
+            <td>Scope 3 (Other)</td>
+            <td>{{public_transport_emissions|add:water_supply_emissions|add:plastic_waste_emissions|add:paper_emissions|add:ewaste_emissions|add:red_meat_emissions|add:poultry_emissions|add:vegetables_emissions}}</td>
+        </tr>
+        <tr>
+            <td><strong>Total</strong></td>
+            <td><strong>{{ total_emissions }}</strong></td>
+        </tr>
     </table>
 </body>
+
 </html>

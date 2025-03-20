@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import EmissionData, EmissionFactor, EnergyConsumption, FuelConsumption, Transportation, WaterUsage, WasteManagement, PaperUsage
-from .forms import EmissionDataForm, EnergyConsumptionForm, FuelConsumptionForm, TransportationForm, WaterUsageForm, WasteManagementForm, PaperUsageForm
+from .models import EmissionData, EmissionFactor, EnergyConsumption, FuelConsumption, Transportation, WaterUsage, WasteManagement, PaperUsage, FoodConsumption, Refrigerants
+from .forms import EmissionDataForm, EnergyConsumptionForm, FuelConsumptionForm, TransportationForm, WaterUsageForm, WasteManagementForm, PaperUsageForm, FoodConsumptionForm, RefrigerantsForm
 import csv
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from datetime import datetime
@@ -12,8 +12,33 @@ from .models import MonthlyEmissionData
 from urllib.parse import urlencode
 
 @login_required
+def check_year(request):
+    year = request.GET.get('year')
+    exists = EmissionData.objects.filter(
+        user=request.user,
+        year=year
+    ).exists()
+    return JsonResponse({'exists': exists})
+
+@login_required
 def input_data(request):
+    year_error = None
     if request.method == 'POST':
+        year = request.POST.get('year')
+        if EmissionData.objects.filter(user=request.user, year=year).exists():
+            year_error = f"Data for year {year} already exists. Please choose a different year."
+            return render(request, 'emissions/input_form.html', {
+                'year_error': year_error,
+                'emi_data_form': EmissionDataForm(request.POST),
+                'energy_form': EnergyConsumptionForm(request.POST),
+                'fuel_form': FuelConsumptionForm(request.POST),
+                'transport_form': TransportationForm(request.POST),
+                'water_form': WaterUsageForm(request.POST),
+                'waste_form': WasteManagementForm(request.POST),
+                'paper_form': PaperUsageForm(request.POST),
+                'food_form': FoodConsumptionForm(request.POST),
+                'refrigerants_form': RefrigerantsForm(request.POST)
+            })
         # Create a new EmissionData instance for the submitted data
         emi_data_form = EmissionDataForm(request.POST)
         energy_form = EnergyConsumptionForm(request.POST)
@@ -22,9 +47,12 @@ def input_data(request):
         water_form = WaterUsageForm(request.POST)
         waste_form = WasteManagementForm(request.POST)
         paper_form = PaperUsageForm(request.POST)
+        food_form = FoodConsumptionForm(request.POST)
+        refrigerants_form = RefrigerantsForm(request.POST)
 
         if (emi_data_form.is_valid() and energy_form.is_valid() and fuel_form.is_valid() and
-            transport_form.is_valid() and water_form.is_valid() and waste_form.is_valid() and paper_form.is_valid()):
+            transport_form.is_valid() and water_form.is_valid() and waste_form.is_valid() and paper_form.is_valid() and
+            food_form.is_valid() and refrigerants_form.is_valid()):
             
             emission_data = emi_data_form.save(commit=False)
             emission_data.user = request.user
@@ -54,9 +82,28 @@ def input_data(request):
             paper.emi_data = emission_data
             paper.save()
 
+            food = food_form.save(commit=False)
+            food.emi_data = emission_data
+            food.save()
+
+            refrigerants = refrigerants_form.save(commit=False)
+            refrigerants.emi_data = emission_data
+            refrigerants.save()
+
             return redirect('results', emission_data.id)
     else:
         year = request.GET.get('year')
+        
+        # Initialize all forms
+        emi_data_form = EmissionDataForm()
+        energy_form = EnergyConsumptionForm()
+        fuel_form = FuelConsumptionForm()
+        transport_form = TransportationForm()
+        water_form = WaterUsageForm()
+        waste_form = WasteManagementForm()
+        paper_form = PaperUsageForm()
+        food_form = FoodConsumptionForm()  # Initialize this
+        refrigerants_form = RefrigerantsForm()  # Initialize this
         
         # Check if we have prefilled data from monthly summary
         prefilled_data = {
@@ -77,7 +124,12 @@ def input_data(request):
             'plastic_waste_kg': request.GET.get('plastic_waste_kg'),
             'sewage_liters': request.GET.get('sewage_liters'),
             'ewaste_kg': request.GET.get('ewaste_kg'),
-            'paper_kg': request.GET.get('paper_kg')
+            'paper_kg': request.GET.get('paper_kg'),
+            'red_meat_kg': request.GET.get('red_meat_kg'),
+            'poultry_kg': request.GET.get('poultry_kg'),
+            'vegetables_kg': request.GET.get('vegetables_kg'),
+            'r134a_kg': request.GET.get('r134a_kg'),
+            'r410a_kg': request.GET.get('r410a_kg')
         }
         
         if year and all(v is not None for v in prefilled_data.values()):
@@ -111,6 +163,15 @@ def input_data(request):
             paper_form = PaperUsageForm(initial={
                 'paper_kg': prefilled_data['paper_kg']
             })
+            food_form = FoodConsumptionForm(initial={
+                'red_meat_kg': prefilled_data['red_meat_kg'],
+                'poultry_kg': prefilled_data['poultry_kg'],
+                'vegetables_kg': prefilled_data['vegetables_kg']
+            })
+            refrigerants_form = RefrigerantsForm(initial={
+                'r134a_kg': prefilled_data['r134a_kg'],
+                'r410a_kg': prefilled_data['r410a_kg']
+            })
         else:
             if year:
                 emission_data = get_object_or_404(EmissionData, user=request.user, year=year)
@@ -120,6 +181,8 @@ def input_data(request):
                 water = get_object_or_404(WaterUsage, emi_data=emission_data)
                 waste = get_object_or_404(WasteManagement, emi_data=emission_data)
                 paper = get_object_or_404(PaperUsage, emi_data=emission_data)
+                food = get_object_or_404(FoodConsumption, emi_data=emission_data)  # Add this
+                refrigerants = get_object_or_404(Refrigerants, emi_data=emission_data)  # Add this
             else:
                 emission_data = None
                 energy = None
@@ -128,6 +191,8 @@ def input_data(request):
                 water = None
                 waste = None
                 paper = None
+                food = None  # Add this
+                refrigerants = None  # Add this
 
             if request.method == 'POST':
                 if 'csv_file' in request.FILES:
@@ -138,41 +203,92 @@ def input_data(request):
                     decoded_file = csv_file.read().decode('utf-8').splitlines()
                     reader = csv.DictReader(decoded_file)
                     for row in reader:
-                        if row['year'] == year:
-                            emi_data_form = EmissionDataForm({
-                                'year': row['year'],
-                                'user': request.user.id
-                            }, instance=emission_data)
-                            energy_form = EnergyConsumptionForm({
-                                'electricity_kwh': row['electricity_kwh'],
-                                'solar_generation_kwh': row['solar_generation_kwh'],
-                                'generator_fuel_liters': row['generator_fuel_liters']
-                            }, instance=energy)
-                            fuel_form = FuelConsumptionForm({
-                                'diesel_liters': row['diesel_liters'],
-                                'petrol_liters': row['petrol_liters'],
-                                'lpg_kg': row['lpg_kg']
-                            }, instance=fuel)
-                            transport_form = TransportationForm({
-                                'distance_by_bus_km': row['distance_by_bus_km'],
-                                'distance_by_personal_km': row['distance_by_personal_km'],
-                                'distance_by_public_km': row['distance_by_public_km'],
-                                'distance_by_ev_km': row['distance_by_ev_km']
-                            }, instance=transport)
-                            water_form = WaterUsageForm({
-                                'water_consumed_kl': row['water_consumed_kl'],
-                                'wastewater_treated_kl': row['wastewater_treated_kl']
-                            }, instance=water)
-                            waste_form = WasteManagementForm({
-                                'organic_waste_kg': row['organic_waste_kg'],
-                                'plastic_waste_kg': row['plastic_waste_kg'],
-                                'sewage_liters': row['sewage_liters'],
-                                'ewaste_kg': row['ewaste_kg']
-                            }, instance=waste)
-                            paper_form = PaperUsageForm({
-                                'paper_kg': row['paper_kg']
-                            }, instance=paper)
-                            break
+                        # Initialize all forms with CSV data
+                        emi_data_form = EmissionDataForm({
+                            'year': row['year'],
+                            'user': request.user.id
+                        })
+                        energy_form = EnergyConsumptionForm({
+                            'electricity_kwh': row['electricity_kwh'],
+                            'solar_generation_kwh': row['solar_generation_kwh'],
+                            'generator_fuel_liters': row['generator_fuel_liters']
+                        })
+                        fuel_form = FuelConsumptionForm({
+                            'diesel_liters': row['diesel_liters'],
+                            'petrol_liters': row['petrol_liters'],
+                            'lpg_kg': row['lpg_kg']
+                        })
+                        transport_form = TransportationForm({
+                            'distance_by_bus_km': row['distance_by_bus_km'],
+                            'distance_by_personal_km': row['distance_by_personal_km'],
+                            'distance_by_public_km': row['distance_by_public_km'],
+                            'distance_by_ev_km': row['distance_by_ev_km']
+                        })
+                        water_form = WaterUsageForm({
+                            'water_consumed_kl': row['water_consumed_kl'],
+                            'wastewater_treated_kl': row['wastewater_treated_kl']
+                        })
+                        waste_form = WasteManagementForm({
+                            'organic_waste_kg': row['organic_waste_kg'],
+                            'plastic_waste_kg': row['plastic_waste_kg'],
+                            'sewage_liters': row['sewage_liters'],
+                            'ewaste_kg': row['ewaste_kg']
+                        })
+                        paper_form = PaperUsageForm({
+                            'paper_kg': row['paper_kg']
+                        })
+                        food_form = FoodConsumptionForm({
+                            'red_meat_kg': row['red_meat_kg'],
+                            'poultry_kg': row['poultry_kg'],
+                            'vegetables_kg': row['vegetables_kg']
+                        })
+                        refrigerants_form = RefrigerantsForm({
+                            'r134a_kg': row['r134a_kg'],
+                            'r410a_kg': row['r410a_kg']
+                        })
+
+                        # Process the forms normally
+                        if (emi_data_form.is_valid() and energy_form.is_valid() and fuel_form.is_valid() and
+                            transport_form.is_valid() and water_form.is_valid() and waste_form.is_valid() and paper_form.is_valid() and
+                            food_form.is_valid() and refrigerants_form.is_valid()):
+                            
+                            emission_data = emi_data_form.save(commit=False)
+                            emission_data.user = request.user
+                            emission_data.save()
+
+                            energy = energy_form.save(commit=False)
+                            energy.emi_data = emission_data
+                            energy.save()
+
+                            fuel = fuel_form.save(commit=False)
+                            fuel.emi_data = emission_data
+                            fuel.save()
+
+                            transport = transport_form.save(commit=False)
+                            transport.emi_data = emission_data
+                            transport.save()
+
+                            water = water_form.save(commit=False)
+                            water.emi_data = emission_data
+                            water.save()
+
+                            waste = waste_form.save(commit=False)
+                            waste.emi_data = emission_data
+                            waste.save()
+
+                            paper = paper_form.save(commit=False)
+                            paper.emi_data = emission_data
+                            paper.save()
+
+                            food = food_form.save(commit=False)
+                            food.emi_data = emission_data
+                            food.save()
+
+                            refrigerants = refrigerants_form.save(commit=False)
+                            refrigerants.emi_data = emission_data
+                            refrigerants.save()
+
+                            return redirect('results', emission_data.id)
                 else:
                     emi_data_form = EmissionDataForm(request.POST, instance=emission_data)
                     energy_form = EnergyConsumptionForm(request.POST, instance=energy)
@@ -181,6 +297,8 @@ def input_data(request):
                     water_form = WaterUsageForm(request.POST, instance=water)
                     waste_form = WasteManagementForm(request.POST, instance=waste)
                     paper_form = PaperUsageForm(request.POST, instance=paper)
+                    food_form = FoodConsumptionForm(request.POST, instance=food)  # Add this
+                    refrigerants_form = RefrigerantsForm(request.POST, instance=refrigerants)  # Add this
 
                 if (emi_data_form.is_valid() and energy_form.is_valid() and fuel_form.is_valid() and
                     transport_form.is_valid() and water_form.is_valid() and waste_form.is_valid() and paper_form.is_valid()):
@@ -218,6 +336,8 @@ def input_data(request):
                 water_form = WaterUsageForm(instance=water)
                 waste_form = WasteManagementForm(instance=waste)
                 paper_form = PaperUsageForm(instance=paper)
+                food_form = FoodConsumptionForm(instance=food)  # Add this
+                refrigerants_form = RefrigerantsForm(instance=refrigerants)  # Add this
 
     return render(request, 'emissions/input_form.html', {
         'emi_data_form': emi_data_form,
@@ -227,6 +347,8 @@ def input_data(request):
         'water_form': water_form,
         'waste_form': waste_form,
         'paper_form': paper_form,
+        'food_form': food_form,           # Add this line
+        'refrigerants_form': refrigerants_form  # Add this line
     })
 
 @login_required
@@ -238,6 +360,8 @@ def edit_data(request, emi_data_id):
     water = get_object_or_404(WaterUsage, emi_data=emission_data)
     waste = get_object_or_404(WasteManagement, emi_data=emission_data)
     paper = get_object_or_404(PaperUsage, emi_data=emission_data)
+    food = get_object_or_404(FoodConsumption, emi_data=emission_data)
+    refrigerants = get_object_or_404(Refrigerants, emi_data=emission_data)
 
     if request.method == 'POST':
         emi_data_form = EmissionDataForm(request.POST, instance=emission_data)
@@ -247,9 +371,12 @@ def edit_data(request, emi_data_id):
         water_form = WaterUsageForm(request.POST, instance=water)
         waste_form = WasteManagementForm(request.POST, instance=waste)
         paper_form = PaperUsageForm(request.POST, instance=paper)
+        food_form = FoodConsumptionForm(request.POST, instance=food)
+        refrigerants_form = RefrigerantsForm(request.POST, instance=refrigerants)
 
         if (emi_data_form.is_valid() and energy_form.is_valid() and fuel_form.is_valid() and
-            transport_form.is_valid() and water_form.is_valid() and waste_form.is_valid() and paper_form.is_valid()):
+            transport_form.is_valid() and water_form.is_valid() and waste_form.is_valid() and paper_form.is_valid() and
+            food_form.is_valid() and refrigerants_form.is_valid()):
             
             emission_data = emi_data_form.save(commit=False)
             emission_data.user = request.user
@@ -272,6 +399,12 @@ def edit_data(request, emi_data_id):
             paper = paper_form.save(commit=False)
             paper.emi_data = emission_data
             paper.save()
+            food = food_form.save(commit=False)
+            food.emi_data = emission_data
+            food.save()
+            refrigerants = refrigerants_form.save(commit=False)
+            refrigerants.emi_data = emission_data
+            refrigerants.save()
             return redirect('results', emission_data.id)
     else:
         emi_data_form = EmissionDataForm(instance=emission_data)
@@ -281,6 +414,8 @@ def edit_data(request, emi_data_id):
         water_form = WaterUsageForm(instance=water)
         waste_form = WasteManagementForm(instance=waste)
         paper_form = PaperUsageForm(instance=paper)
+        food_form = FoodConsumptionForm(instance=food)
+        refrigerants_form = RefrigerantsForm(instance=refrigerants)
 
     return render(request, 'emissions/edit_form.html', {
         'emi_data_form': emi_data_form,
@@ -290,6 +425,8 @@ def edit_data(request, emi_data_id):
         'water_form': water_form,
         'waste_form': waste_form,
         'paper_form': paper_form,
+        'food_form': food_form,           # Add this line
+        'refrigerants_form': refrigerants_form  # Add this line
     })
 
 @login_required
@@ -299,13 +436,6 @@ def results(request, emi_data_id):
 
     # Ensure there is at least one EmissionFactor entry
     factors = EmissionFactor.objects.first()
-    if not factors:
-        # Optionally, you can create a default EmissionFactor entry here or handle the error
-        factors = EmissionFactor.objects.create(
-            electricity=0.5, diesel=2.68, petrol=2.31, lpg=1.5, water_supply=0.344,
-            wastewater_treatment=0.2, organic_waste=0.1, plastic_waste=6.0,
-            sewage_treatment=0.3, paper=1.5, refrigerant_gwp=1000,ewaste=1.0,
-        )
 
     energy = emission_data.energyconsumption
     fuel = emission_data.fuelconsumption
@@ -313,21 +443,29 @@ def results(request, emi_data_id):
     water = emission_data.waterusage
     waste = emission_data.wastemanagement
     paper = emission_data.paperusage
+    food = emission_data.foodconsumption
+    refrigerants = emission_data.refrigerants
 
     electricity_emissions = energy.electricity_kwh * factors.electricity
-    diesel_emissions = fuel.diesel_liters * 2.68
-    petrol_emissions = fuel.petrol_liters * 2.31
+    diesel_emissions = fuel.diesel_liters * factors.diesel
+    petrol_emissions = fuel.petrol_liters * factors.petrol
     lpg_emissions = fuel.lpg_kg * factors.lpg
-    public_transport_emissions = transport.distance_by_public_km * 0.125
-    water_supply_emissions = water.water_consumed_kl * 0.344
-    plastic_waste_emissions = waste.plastic_waste_kg * 6.0
+    public_transport_emissions = transport.distance_by_public_km *factors.public_transport
+    water_supply_emissions = water.water_consumed_kl * factors.water_supply
+    plastic_waste_emissions = waste.plastic_waste_kg * factors.plastic_waste
     paper_emissions = paper.paper_kg * factors.paper
     ewaste_emissions = waste.ewaste_kg * factors.ewaste
+    red_meat_emissions = food.red_meat_kg * factors.red_meat
+    poultry_emissions = food.poultry_kg * factors.poultry
+    vegetables_emissions = food.vegetables_kg * factors.vegetables
+    r134a_emissions = refrigerants.r134a_kg * factors.r134a
+    r410a_emissions = refrigerants.r410a_kg * factors.r410a
 
     total_emissions = (
         electricity_emissions + diesel_emissions + petrol_emissions +
         lpg_emissions + public_transport_emissions + water_supply_emissions +
-        plastic_waste_emissions + paper_emissions
+        plastic_waste_emissions + paper_emissions + red_meat_emissions +
+        poultry_emissions + vegetables_emissions + r134a_emissions + r410a_emissions
     )
 
     emission_data.total_emissions = total_emissions
@@ -340,6 +478,11 @@ def results(request, emi_data_id):
     emission_data.plastic_waste_emissions = plastic_waste_emissions
     emission_data.paper_emissions = paper_emissions
     emission_data.ewaste_emissions = ewaste_emissions
+    emission_data.red_meat_emissions = red_meat_emissions
+    emission_data.poultry_emissions = poultry_emissions
+    emission_data.vegetables_emissions = vegetables_emissions
+    emission_data.r134a_emissions = r134a_emissions
+    emission_data.r410a_emissions = r410a_emissions
     emission_data.save()
 
     context = {
@@ -355,6 +498,11 @@ def results(request, emi_data_id):
         'total_emissions': total_emissions,
         'current_year': current_year,
         'ewaste_emissions': emission_data.ewaste_emissions,
+        'red_meat_emissions': red_meat_emissions,
+        'poultry_emissions': poultry_emissions,
+        'vegetables_emissions': vegetables_emissions,
+        'r134a_emissions': r134a_emissions,
+        'r410a_emissions': r410a_emissions,
     }
     return render(request, 'emissions/results.html', context)
 
@@ -373,6 +521,11 @@ def download_pdf(request, emi_data_id):
         'paper_emissions': emission_data.paper_emissions,
         'total_emissions': emission_data.total_emissions,
         'ewaste_emissions': emission_data.ewaste_emissions,
+        'red_meat_emissions': emission_data.red_meat_emissions,
+        'poultry_emissions': emission_data.poultry_emissions,
+        'vegetables_emissions': emission_data.vegetables_emissions,
+        'r134a_emissions': emission_data.r134a_emissions,
+        'r410a_emissions': emission_data.r410a_emissions,
     }
     template_path = 'emissions/pdf_template.html'
     response = HttpResponse(content_type='application/pdf')
@@ -393,6 +546,8 @@ def emission_detail(request, emi_data_id):
     water = emission_data.waterusage
     waste = emission_data.wastemanagement
     paper = emission_data.paperusage
+    food = emission_data.foodconsumption
+    refrigerants = emission_data.refrigerants
 
     context = {
         'emission_data': emission_data,
@@ -402,6 +557,8 @@ def emission_detail(request, emi_data_id):
         'water': water,
         'waste': waste,
         'paper': paper,
+        'food': food,               # Add this line
+        'refrigerants': refrigerants  # Add this line
     }
     return render(request, 'emissions/emission_detail.html', context)
 
@@ -441,7 +598,10 @@ def monthly_data_entry(request):
             'distance_by_bus_km', 'distance_by_personal_km', 'distance_by_public_km', 'distance_by_ev_km',
             'water_consumed_kl', 'wastewater_treated_kl',
             'organic_waste_kg', 'plastic_waste_kg', 'sewage_liters', 'ewaste_kg',
-            'paper_kg'
+            'paper_kg',
+            # Add new fields
+            'red_meat_kg', 'poultry_kg', 'vegetables_kg',
+            'r134a_kg', 'r410a_kg'
         ]
         
         print("\nReceived values:")
@@ -555,7 +715,13 @@ def monthly_data_summary(request):
             plastic_waste_kg=Sum('plastic_waste_kg'),
             sewage_liters=Sum('sewage_liters'),
             ewaste_kg=Sum('ewaste_kg'),
-            paper_kg=Sum('paper_kg')
+            paper_kg=Sum('paper_kg'),
+            # Add new fields
+            red_meat_kg=Sum('red_meat_kg'),
+            poultry_kg=Sum('poultry_kg'),
+            vegetables_kg=Sum('vegetables_kg'),
+            r134a_kg=Sum('r134a_kg'),
+            r410a_kg=Sum('r410a_kg')
         )
         
         # Redirect to input form with calculated totals
@@ -612,7 +778,12 @@ def monthly_data_summary(request):
         total_plastic=Sum('plastic_waste_kg'),
         total_sewage=Sum('sewage_liters'),
         total_ewaste=Sum('ewaste_kg'),
-        total_paper=Sum('paper_kg')
+        total_paper=Sum('paper_kg'),
+        total_red_meat=Sum('red_meat_kg'),
+        total_poultry=Sum('poultry_kg'),
+        total_vegetables=Sum('vegetables_kg'),
+        total_r134a=Sum('r134a_kg'),
+        total_r410a=Sum('r410a_kg')
     )
     
     # Get all available years
@@ -660,3 +831,22 @@ def monthly_data_summary(request):
     }
     
     return render(request, 'emissions/monthly_data_summary.html', context)
+
+def downloadSampleCSV():
+    sampleData = [
+        ["year", "electricity_kwh", "solar_generation_kwh", "generator_fuel_liters", 
+         "diesel_liters", "petrol_liters", "lpg_kg", "distance_by_bus_km", 
+         "distance_by_personal_km", "distance_by_public_km", "distance_by_ev_km", 
+         "water_consumed_kl", "wastewater_treated_kl", "organic_waste_kg", 
+         "plastic_waste_kg", "sewage_liters", "ewaste_kg", "paper_kg",
+         "red_meat_kg", "poultry_kg", "vegetables_kg", "r134a_kg", "r410a_kg"],
+        ["2023", "1000", "200", "50", "300", "400", "100", "500", "600", 
+         "700", "800", "900", "1000", "1100", "1200", "1300", "1400", 
+         "1500", "100", "200", "300", "10", "15"]
+    ]
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="sample_data.csv"'
+    writer = csv.writer(response)
+    for row in sampleData:
+        writer.writerow(row)
+    return response

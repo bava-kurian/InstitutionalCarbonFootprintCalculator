@@ -6,6 +6,7 @@ class EmissionFactor(models.Model):
     diesel = models.FloatField()
     petrol = models.FloatField()
     lpg = models.FloatField()
+    public_transport=models.FloatField(default=1.0)
     water_supply = models.FloatField()
     wastewater_treatment = models.FloatField()
     organic_waste = models.FloatField()
@@ -14,6 +15,11 @@ class EmissionFactor(models.Model):
     paper = models.FloatField()
     ewaste=models.FloatField(default=0.0)
     refrigerant_gwp = models.FloatField()
+    red_meat = models.FloatField(default=1.0)
+    poultry = models.FloatField(default=1.0)
+    vegetables = models.FloatField(default=1.0)
+    r134a = models.FloatField(default=1.0)
+    r410a = models.FloatField(default=1.0)
 
     def __str__(self):
         return f"Emission Factors"
@@ -31,6 +37,11 @@ class EmissionData(models.Model):
     plastic_waste_emissions = models.FloatField(default=0.0)
     paper_emissions = models.FloatField(default=0.0)
     ewaste_emissions = models.FloatField(default=0.0)
+    red_meat_emissions = models.FloatField(default=0.0)
+    poultry_emissions = models.FloatField(default=0.0)
+    vegetables_emissions = models.FloatField(default=0.0)
+    r134a_emissions = models.FloatField(default=0.0)
+    r410a_emissions = models.FloatField(default=0.0)
 
     class Meta:
         unique_together = ('user', 'year')
@@ -91,6 +102,23 @@ class PaperUsage(models.Model):
     def __str__(self):
         return f"Paper Usage for {self.emi_data.year}"
 
+class FoodConsumption(models.Model):
+    emi_data = models.OneToOneField(EmissionData, on_delete=models.CASCADE, primary_key=True)
+    red_meat_kg = models.FloatField()
+    poultry_kg = models.FloatField()
+    vegetables_kg = models.FloatField()
+
+    def __str__(self):
+        return f"Food Consumption for {self.emi_data.year}"
+
+class Refrigerants(models.Model):
+    emi_data = models.OneToOneField(EmissionData, on_delete=models.CASCADE, primary_key=True)
+    r134a_kg = models.FloatField()
+    r410a_kg = models.FloatField()
+
+    def __str__(self):
+        return f"Refrigerants for {self.emi_data.year}"
+
 class MonthlyEmissionData(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     year = models.IntegerField()
@@ -125,6 +153,15 @@ class MonthlyEmissionData(models.Model):
     
     # Paper
     paper_kg = models.FloatField(null=True, blank=True, default=None)
+
+    # Food
+    red_meat_kg = models.FloatField(null=True, blank=True, default=None)
+    poultry_kg = models.FloatField(null=True, blank=True, default=None)
+    vegetables_kg = models.FloatField(null=True, blank=True, default=None)
+
+    # Refrigerants
+    r134a_kg = models.FloatField(null=True, blank=True, default=None)
+    r410a_kg = models.FloatField(null=True, blank=True, default=None)
 
     class Meta:
         unique_together = ('user', 'year', 'month')

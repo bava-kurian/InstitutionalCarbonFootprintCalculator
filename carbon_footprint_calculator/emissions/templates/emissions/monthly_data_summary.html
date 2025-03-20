@@ -26,6 +26,8 @@
                 <th colspan="2">Water</th>
                 <th colspan="4">Waste</th>
                 <th>Paper</th>
+                <th colspan="3">Food</th>
+                <th colspan="2">Refrigerants</th>
                 <th>Actions</th>
             </tr>
             <tr>
@@ -53,6 +55,13 @@
                 <th>E-Waste (kg)</th>
                 <!-- Paper -->
                 <th>Paper (kg)</th>
+                <!-- Food -->
+                <th>Red Meat (kg)</th>
+                <th>Poultry (kg)</th>
+                <th>Vegetables (kg)</th>
+                <!-- Refrigerants -->
+                <th>R134a (kg)</th>
+                <th>R410a (kg)</th>
                 <th></th>
             </tr>
         </thead>
@@ -83,6 +92,13 @@
                 <td>{{ month.data.ewaste_kg|default:'-' }}</td>
                 <!-- Paper -->
                 <td>{{ month.data.paper_kg|default:'-' }}</td>
+                <!-- Food -->
+                <td>{{ month.data.red_meat_kg|default:'-' }}</td>
+                <td>{{ month.data.poultry_kg|default:'-' }}</td>
+                <td>{{ month.data.vegetables_kg|default:'-' }}</td>
+                <!-- Refrigerants -->
+                <td>{{ month.data.r134a_kg|default:'-' }}</td>
+                <td>{{ month.data.r410a_kg|default:'-' }}</td>
                 <td class="actions-cell">
                     {% if month.data %}
                         <a href="{% url 'monthly_data_entry' %}?year={{ year }}&month={{ month.month_num }}" class="edit-button">Edit</a>
@@ -115,6 +131,13 @@
                 <td>{{ totals.total_ewaste|default:'0' }}</td>
                 <!-- Paper -->
                 <td>{{ totals.total_paper|default:'0' }}</td>
+                <!-- Food -->
+                <td>{{ totals.total_red_meat|default:'0' }}</td>
+                <td>{{ totals.total_poultry|default:'0' }}</td>
+                <td>{{ totals.total_vegetables|default:'0' }}</td>
+                <!-- Refrigerants -->
+                <td>{{ totals.total_r134a|default:'0' }}</td>
+                <td>{{ totals.total_r410a|default:'0' }}</td>
                 <td></td>
             </tr>
         </tbody>
@@ -128,12 +151,6 @@
             <input type="hidden" name="transfer_to_input" value="1">
             <button type="submit" class="cta-button">Transfer to Input Form</button>
         </form>
-    {% else %}
-    <form method="post" style="display: inline;">
-        {% csrf_token %}
-        <input type="hidden" name="transfer_to_input" value="1">
-        <button type="submit" class="cta-button" disabled>Transfer to Input Form</button>
-
     {% endif %}
 </form>
 <a href="{% url 'monthly_data_entry' %}?year={{ year }}&next_month={{ next_month }}&prefill=true" 
@@ -141,6 +158,29 @@
     Continue Entering Data for {{ next_month|stringformat:"02d" }}/{{ year }}
 </a>
 </div>
+
+<!-- Update the fields_to_check -->
+<script>
+    fields_to_check = [
+        'electricity_kwh', 'solar_generation_kwh', 'generator_fuel_liters',
+        'diesel_liters', 'petrol_liters', 'lpg_kg',
+        'distance_by_bus_km', 'distance_by_personal_km', 'distance_by_public_km', 'distance_by_ev_km',
+        'water_consumed_kl', 'wastewater_treated_kl',
+        'organic_waste_kg', 'plastic_waste_kg', 'sewage_liters', 'ewaste_kg',
+        'paper_kg', 'red_meat_kg', 'poultry_kg', 'vegetables_kg',
+        'r134a_kg', 'r410a_kg'  // Add these fields
+    ];
+
+    // Calculate yearly totals
+    yearly_totals = monthly_data.aggregate(
+        // ...existing totals...
+        red_meat_kg=Sum('red_meat_kg'),
+        poultry_kg=Sum('poultry_kg'),
+        vegetables_kg=Sum('vegetables_kg'),
+        r134a_kg=Sum('r134a_kg'),
+        r410a_kg=Sum('r410a_kg')
+    );
+</script>
 
 <style>
     .year-selector {

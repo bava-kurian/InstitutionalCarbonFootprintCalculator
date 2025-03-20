@@ -108,6 +108,35 @@
         <input type="number" name="paper_kg" step="0.01" value="{{ existing_data.paper_kg|default:'' }}">
     </div>
 
+    <h3>Food Consumption</h3>
+    <div class="form-group">
+        <label for="red_meat_kg">Red Meat (kg):</label>
+        <input type="number" step="0.01" name="red_meat_kg" id="red_meat_kg" 
+               value="{{ existing_data.red_meat_kg|default:'' }}">
+    </div>
+    <div class="form-group">
+        <label for="poultry_kg">Poultry (kg):</label>
+        <input type="number" step="0.01" name="poultry_kg" id="poultry_kg" 
+               value="{{ existing_data.poultry_kg|default:'' }}">
+    </div>
+    <div class="form-group">
+        <label for="vegetables_kg">Vegetables (kg):</label>
+        <input type="number" step="0.01" name="vegetables_kg" id="vegetables_kg" 
+               value="{{ existing_data.vegetables_kg|default:'' }}">
+    </div>
+
+    <h3>Refrigerants</h3>
+    <div class="form-group">
+        <label for="r134a_kg">R134a (kg):</label>
+        <input type="number" step="0.01" name="r134a_kg" id="r134a_kg" 
+               value="{{ existing_data.r134a_kg|default:'' }}">
+    </div>
+    <div class="form-group">
+        <label for="r410a_kg">R410a (kg):</label>
+        <input type="number" step="0.01" name="r410a_kg" id="r410a_kg" 
+               value="{{ existing_data.r410a_kg|default:'' }}">
+    </div>
+
     <div class="form-actions">
         <button type="submit" class="cta-button">Save Monthly Data</button>
         <a href="{% url 'monthly_data_summary' %}" class="cta-button secondary">View Summary</a>

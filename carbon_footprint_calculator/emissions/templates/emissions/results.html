@@ -28,6 +28,14 @@
             <td style="border: 1px solid #ddd; padding: 8px;">LPG</td>
             <td style="border: 1px solid #ddd; padding: 8px;">{{ lpg_emissions }}</td>
         </tr>
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">R134a Refrigerant</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ r134a_emissions }}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">R410a Refrigerant</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ r410a_emissions }}</td>
+        </tr>
     </tbody>
 </table>
 
@@ -76,6 +84,18 @@
             <td style="border: 1px solid #ddd; padding: 8px;">E-Waste</td>
             <td style="border: 1px solid #ddd; padding: 8px;">{{ ewaste_emissions }}</td>
         </tr>
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">Red Meat</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ red_meat_emissions }}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">Poultry</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ poultry_emissions }}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">Vegetables</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ vegetables_emissions }}</td>
+        </tr>
     </tbody>
 </table>
 <br>
@@ -98,7 +118,7 @@
     var emissionsChart = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: ['Electricity', 'Diesel', 'Petrol', 'LPG', 'Public Transport', 'Water Supply', 'Plastic Waste', 'Paper Usage', 'E-Waste'],
+            labels: ['Electricity', 'Diesel', 'Petrol', 'LPG', 'Public Transport', 'Water Supply', 'Plastic Waste', 'Paper Usage', 'E-Waste', 'Red Meat', 'Poultry', 'Vegetables', 'R134a', 'R410a'],
             datasets: [{
                 label: 'Emissions (kg CO2e)',
                 data: [
@@ -110,7 +130,12 @@
                     {{ water_supply_emissions }},
                     {{ plastic_waste_emissions }},
                     {{ paper_emissions }},
-                    {{ ewaste_emissions }}
+                    {{ ewaste_emissions }},
+                    {{ red_meat_emissions }},
+                    {{ poultry_emissions }},
+                    {{ vegetables_emissions }},
+                    {{ r134a_emissions }},
+                    {{ r410a_emissions }}
                 ],
                 backgroundColor: [
                     'rgba(0, 0, 139, 0.4)',   // Electricity
@@ -120,7 +145,12 @@
                     'rgba(255, 159, 64, 0.4)',   // Public Transport
                     'rgba(255, 99, 132, 0.4)',   // Water Supply
                     'rgba(255, 255, 0, 0.4)',   // Plastic Waste
-                    'rgba(0, 128, 0, 0.4)'       // Paper Usage
+                    'rgba(0, 128, 0, 0.4)',       // Paper Usage
+                    'rgba(139, 69, 19, 0.4)',  // Red Meat
+                    'rgba(255, 218, 185, 0.4)', // Poultry
+                    'rgba(0, 255, 0, 0.4)',     // Vegetables
+                    'rgba(135, 206, 235, 0.4)', // R134a
+                    'rgba(70, 130, 180, 0.4)'   // R410a
                 ],
                 borderColor: [
                     'rgba(0, 0, 139, 1)',     // Electricity
@@ -130,7 +160,12 @@
                     'rgba(255, 159, 64, 1)',     // Public Transport
                     'rgba(255, 99, 132, 1)',     // Water Supply
                     'rgba(255, 255, 0, 1)',     // Plastic Waste
-                    'rgba(0, 128, 0, 1)'         // Paper Usage
+                    'rgba(0, 128, 0, 1)',         // Paper Usage
+                    'rgba(139, 69, 19, 1)',
+                    'rgba(255, 218, 185, 1)',
+                    'rgba(0, 255, 0, 1)',
+                    'rgba(135, 206, 235, 1)',
+                    'rgba(70, 130, 180, 1)'
                 ],
                 borderWidth: 1
             }]

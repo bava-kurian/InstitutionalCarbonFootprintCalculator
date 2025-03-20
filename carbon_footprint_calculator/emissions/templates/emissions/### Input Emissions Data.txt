@@ -1,0 +1,60 @@
+### Input Emissions Data
+
+#### General Information
+
+- Year
+
+#### Energy Consumption
+
+- Electricity (kWh)
+- Solar Generation (kWh)
+- Generator Fuel (Liters)
+
+#### Fuel Consumption
+
+- Diesel (Liters)
+- Petrol (Liters)
+- LPG (kg)
+
+#### Transportation
+
+- Distance by Bus (km)
+- Distance by Personal Vehicle (km)
+- Distance by Public Transport (km)
+- Distance by Electric Vehicle (km)
+
+#### Water Usage
+
+- Water Consumed (kL)
+- Wastewater Treated (kL)
+
+#### Waste Management
+
+- Organic Waste (kg)
+- Plastic Waste (kg)
+- Sewage (Liters)
+- E-waste (kg)
+
+#### Paper Usage
+
+- Paper (kg)
+
+#### Food Consumption
+
+- Red Meat (kg)
+- Poultry (kg)
+- Vegetables (kg)
+
+#### Refrigerants
+
+- R134a (kg)
+- R410a (kg)
+
+#### Upload CSV
+
+- CSV File Upload
+
+#### Actions
+
+- Submit Form
+- Download Sample CSV

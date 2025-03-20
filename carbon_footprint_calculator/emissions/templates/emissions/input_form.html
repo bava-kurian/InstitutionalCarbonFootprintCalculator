@@ -12,9 +12,18 @@
         border-radius: 5px;
         list-style-type: none;
     }
+    .error-message {
+        color: #dc2626;
+        background-color: #fee2e2;
+        border: 1px solid #ef4444;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
 </style>
 <h1>Input Emissions Data</h1>
-<form method="post" class="input-form">
+<form method="post" class="text-center border p-4 rounded" enctype="multipart/form-data">
     {% csrf_token %}
     <h2>General Information</h2>
     {{ emi_data_form.as_p }}
@@ -30,21 +39,37 @@
     {{ waste_form.as_p }}
     <h2>Paper Usage</h2>
     {{ paper_form.as_p }}
+    <h2>Food Consumption</h2>
+    {{ food_form.as_p }}
+    <h2>Refrigerants</h2>
+    {{ refrigerants_form.as_p }}
     <h2>Upload CSV</h2>
-    <input type="file" id="csvFileInput" accept=".csv">
+    <input type="file" name="csv_file" id="csvFileInput" accept=".csv">
     <br><br>
     <button type="button" onclick="downloadSampleCSV()">Download Sample CSV</button>
     <br><br>
     <div class="form-actions">
-        <button type="submit" class="cta-button">Save Yearly Data</button>
+        {% if year_error %}
+            <div class="error-message">
+                {{ year_error }}
+            </div>
+        {% endif %}
+        <button type="submit" class="cta-button">Submit</button>
     </div>
 </form>
 
 <script>
     function downloadSampleCSV() {
         const sampleData = [
-            ["year", "electricity_kwh", "solar_generation_kwh", "generator_fuel_liters", "diesel_liters", "petrol_liters", "lpg_kg", "distance_by_bus_km", "distance_by_personal_km", "distance_by_public_km", "distance_by_ev_km", "water_consumed_kl", "wastewater_treated_kl", "organic_waste_kg", "plastic_waste_kg", "sewage_liters", "ewaste_kg", "paper_kg"],
-            ["2023", "1000", "200", "50", "300", "400", "100", "500", "600", "700", "800", "900", "1000", "1100", "1200", "1300", "1400", "1500"]
+            ["year", "electricity_kwh", "solar_generation_kwh", "generator_fuel_liters", 
+             "diesel_liters", "petrol_liters", "lpg_kg", "distance_by_bus_km", 
+             "distance_by_personal_km", "distance_by_public_km", "distance_by_ev_km", 
+             "water_consumed_kl", "wastewater_treated_kl", "organic_waste_kg", 
+             "plastic_waste_kg", "sewage_liters", "ewaste_kg", "paper_kg",
+             "red_meat_kg", "poultry_kg", "vegetables_kg", "r134a_kg", "r410a_kg"],
+            ["2023", "1000", "200", "50", "300", "400", "100", "500", "600", 
+             "700", "800", "900", "1000", "1100", "1200", "1300", "1400", 
+             "1500", "100", "200", "300", "10", "15"]
         ];
         let csvContent = "data:text/csv;charset=utf-8," + sampleData.map(e => e.join(",")).join("\n");
         const encodedUri = encodeURI(csvContent);
@@ -57,48 +82,68 @@
 
     document.getElementById('csvFileInput').addEventListener('change', function(event) {
         const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const text = e.target.result;
-                const data = CSVToArray(text);
-                populateForm(data);
-            };
-            reader.readAsText(file);
-        }
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const text = e.target.result;
+            // Split by newline and remove any empty lines
+            const rows = text.split('\n').filter(row => row.trim() !== '');
+            // Get headers and values, and trim whitespace
+            const headers = rows[0].split(',').map(h => h.trim());
+            const values = rows[1].split(',').map(v => v.trim());
+            
+            console.log('Headers:', headers); // Debug log
+            console.log('Values:', values);   // Debug log
+
+            // First set all form fields to empty
+            document.querySelectorAll('form input').forEach(input => {
+                if (input.type === 'number') {
+                    input.value = '';
+                }
+            });
+
+            // Then populate with CSV data
+            headers.forEach((header, index) => {
+                let input = document.querySelector(`input[name="${header}"], select[name="${header}"]`);
+                if (input) {
+                    console.log(`Setting ${header} to ${values[index]}`); // Debug log
+                    input.value = values[index];
+                } else {
+                    console.log(`Could not find input for ${header}`); // Debug log
+                }
+            });
+
+            // Optionally submit the form automatically
+            // document.querySelector('form').submit();
+        };
+        
+        reader.onerror = function(e) {
+            console.error('Error reading CSV file:', e);
+        };
+        
+        reader.readAsText(file);
     });
 
-    function CSVToArray(strData, strDelimiter = ",") {
-        const objPattern = new RegExp(
-            (
-                "(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
-                "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
-                "([^\"\\" + strDelimiter + "\\r\\n]*))"
-            ),
-            "gi"
-        );
-        const arrData = [[]];
-        let arrMatches = null;
-        while (arrMatches = objPattern.exec(strData)) {
-            const strMatchedDelimiter = arrMatches[1];
-            if (strMatchedDelimiter.length && strMatchedDelimiter !== strDelimiter) {
-                arrData.push([]);
-            }
-            const strMatchedValue = arrMatches[2] ? arrMatches[2].replace(new RegExp("\"\"", "g"), "\"") : arrMatches[3];
-            arrData[arrData.length - 1].push(strMatchedValue);
+    document.querySelector('form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const year = document.querySelector('#id_year').value;
+        
+        // Check if year already exists
+        const response = await fetch(`/check_year/?year=${year}`);
+        const data = await response.json();
+        
+        if (data.exists) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = `Data for year ${year} already exists. Please choose a different year.`;
+            
+            const formActions = document.querySelector('.form-actions');
+            formActions.insertBefore(errorDiv, formActions.firstChild);
+            
+            window.scrollTo(0, errorDiv.offsetTop);
+        } else {
+            this.submit();
         }
-        return arrData;
-    }
-
-    function populateForm(data) {
-        const headers = data[0];
-        const values = data[1];
-        headers.forEach((header, index) => {
-            const input = document.querySelector(`[name=${header}]`);
-            if (input) {
-                input.value = values[index];
-            }
-        });
-    }
+    });
 </script>
 {% endblock %}
