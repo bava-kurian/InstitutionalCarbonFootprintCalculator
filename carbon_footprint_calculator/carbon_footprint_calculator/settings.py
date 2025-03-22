@@ -7,7 +7,7 @@ SECRET_KEY = 'django-insecure-dp01-#@ynkqzw3i4u#%(=_b)hg(fko%hkr-m4o&zt2@tqbl8d+
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -73,6 +73,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LOGOUT_REDIRECT_URL = 'login'
+
+ADMIN_ENABLED = False
 
 LANGUAGE_CODE = 'en-us'
 
