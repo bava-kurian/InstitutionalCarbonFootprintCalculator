@@ -10,6 +10,9 @@ from datetime import datetime
 from django.db.models import Sum
 from .models import MonthlyEmissionData
 from urllib.parse import urlencode
+from io import BytesIO
+import base64
+import matplotlib.pyplot as plt
 
 @login_required
 def check_year(request):
@@ -464,7 +467,7 @@ def results(request, emi_data_id):
     total_emissions = (
         electricity_emissions + diesel_emissions + petrol_emissions +
         lpg_emissions + public_transport_emissions + water_supply_emissions +
-        plastic_waste_emissions + paper_emissions + red_meat_emissions +
+        plastic_waste_emissions + paper_emissions + ewaste_emissions + red_meat_emissions +
         poultry_emissions + vegetables_emissions + r134a_emissions + r410a_emissions
     )
 
@@ -527,6 +530,43 @@ def download_pdf(request, emi_data_id):
         'r134a_emissions': emission_data.r134a_emissions,
         'r410a_emissions': emission_data.r410a_emissions,
     }
+
+    # Generate bar graph
+    labels = ['Electricity', 'Diesel', 'Petrol', 'LPG', 'Public Transport', 'Water Supply', 'Plastic Waste', 'Paper Usage', 'E-Waste', 'Red Meat', 'Poultry', 'Vegetables', 'R134a', 'R410a']
+    data = [
+        emission_data.electricity_emissions,
+        emission_data.diesel_emissions,
+        emission_data.petrol_emissions,
+        emission_data.lpg_emissions,
+        emission_data.public_transport_emissions,
+        emission_data.water_supply_emissions,
+        emission_data.plastic_waste_emissions,
+        emission_data.paper_emissions,
+        emission_data.ewaste_emissions,
+        emission_data.red_meat_emissions,
+        emission_data.poultry_emissions,
+        emission_data.vegetables_emissions,
+        emission_data.r134a_emissions,
+        emission_data.r410a_emissions
+    ]
+
+    fig, ax = plt.subplots()
+    ax.bar(labels, data)
+    ax.set_ylabel('Emissions (kg CO2e)')
+    ax.set_title('Emissions Breakdown')
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    image_png = buffer.getvalue()
+    buffer.close()
+
+    graph_base64 = base64.b64encode(image_png).decode('utf-8')
+
+    context['graph_base64'] = graph_base64
+
     template_path = 'emissions/pdf_template.html'
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="emission_report_{emission_data.year}.pdf"'
