@@ -9,7 +9,7 @@
             font-family: Arial, sans-serif;
         }
 
-        h1 {
+        h1, h2, h3 {
             text-align: center;
         }
 
@@ -30,11 +30,22 @@
             padding: 10px;
             text-align: left;
         }
+
+        .graph-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .graph-container img {
+            max-width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 
 <body>
-    <h1>Emission Report for Year: {{ emission_data.year }}</h1>
+    <h1>CarbonScope</h1>
+    <h2>Emission Report for Year: {{ emission_data.year }}</h2>
     <p>Total Emissions: {{ total_emissions }} kg CO2e</p>
     <h2>Breakdown</h2>
 
@@ -122,8 +133,7 @@
         </tr>
         <tr>
             <td>Scope 1 (Direct)</td>
-            <td>{{ diesel_emissions|add:petrol_emissions|add:lpg_emissions|add:r134a_emissions|add:r410a_emissions }}
-            </td>
+            <td>{{ diesel_emissions|add:petrol_emissions|add:lpg_emissions|add:r134a_emissions|add:r410a_emissions }}</td>
         </tr>
         <tr>
             <td>Scope 2 (Indirect)</td>
@@ -131,13 +141,18 @@
         </tr>
         <tr>
             <td>Scope 3 (Other)</td>
-            <td>{{public_transport_emissions|add:water_supply_emissions|add:plastic_waste_emissions|add:paper_emissions|add:ewaste_emissions|add:red_meat_emissions|add:poultry_emissions|add:vegetables_emissions}}</td>
+            <td>{{ public_transport_emissions|add:water_supply_emissions|add:plastic_waste_emissions|add:paper_emissions|add:ewaste_emissions|add:red_meat_emissions|add:poultry_emissions|add:vegetables_emissions }}</td>
         </tr>
         <tr>
             <td><strong>Total</strong></td>
             <td><strong>{{ total_emissions }}</strong></td>
         </tr>
     </table>
+
+    <div class="graph-container">
+        <h3>Emissions Breakdown</h3>
+        <img src="data:image/png;base64,{{ graph_base64 }}" alt="Emissions Breakdown Graph">
+    </div>
 </body>
 
 </html>
